@@ -18,12 +18,12 @@ import PackageCustomize from './pages/client/PackageCustomize';
 import BookingForm from './pages/client/BookingForm';
 import BookingConfirmation from './pages/client/BookingConfirmation';
 import Payment from './pages/client/Payment';
-import BookingHistory from './pages/client/CBookingHistory';
+import CBookingHistory from './pages/client/CBookingHistory';
 
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/MMobileBar_CC106/">
       <Routes>
         <Route path="/" element={<Login />} />
 
