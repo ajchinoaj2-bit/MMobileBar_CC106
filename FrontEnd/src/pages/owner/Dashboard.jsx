@@ -55,7 +55,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Bookings over time */}
+      {/**** Bookings over time *******/}
       <div className="bg-white rounded-lg shadow p-4">
         <h2 className="font-semibold mb-3">Bookings Over Time</h2>
         <div className="h-32 flex items-center justify-center bg-gray-50 text-gray-400 text-sm rounded">
