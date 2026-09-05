@@ -79,7 +79,7 @@ export default function ClientMessages() {
           </div>
 
           {active.isSystem ? (
-            // System message — same look as a normal received message
+  
             <div className="flex justify-start">
               <div className="max-w-md bg-white shadow rounded-lg px-4 py-3">
                 <p className="text-sm">{active.preview}</p>
@@ -87,7 +87,7 @@ export default function ClientMessages() {
               </div>
             </div>
           ) : (
-            // Sent by client, so aligned right + green bubble
+
             <div className="flex justify-end">
               <div className="max-w-md bg-green-700 text-white rounded-lg px-4 py-3">
                 <p className="text-sm">{active.preview}</p>

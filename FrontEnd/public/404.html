@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <title>Redirecting...</title>
     <script>
-      // Redirect to index.html, preserving the intended path as a query param
-      var pathSegmentsToKeep = 1; // number of segments in your base path, e.g. /MMobileBar_CC106/ = 1
+      
+      var pathSegmentsToKeep = 1; 
       var l = window.location;
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
@@ -18,3 +18,4 @@
   </head>
   <body></body>
 </html>
+

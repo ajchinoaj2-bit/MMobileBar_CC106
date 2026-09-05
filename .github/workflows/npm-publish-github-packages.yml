@@ -43,7 +43,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: FrontEnd/dist # Uploads your build output folder safely
+          path: FrontEnd/dist # Uploads build output folder safely
 
       - name: Deploy to GitHub Pages
         id: deployment

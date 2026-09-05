@@ -1,7 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 
-// sample data — later this comes from your backend, matched by :id
 const bookingData = {
   1: {
     bookingId: 'BK-8492',

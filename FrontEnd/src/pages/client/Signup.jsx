@@ -22,7 +22,7 @@ export default function ClientSignup() {
       alert('Please agree to the Terms of Service and Privacy Policy');
       return;
     }
-    // no real registration yet
+    /*To do real registration*/
     navigate('/client/login');
   };
 

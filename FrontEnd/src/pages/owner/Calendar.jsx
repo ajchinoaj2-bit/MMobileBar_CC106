@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-// sample bookings — later this comes from your backend
 const events = [
   { date: '2026-08-11', title: 'Corporate Mixer', time: '18:00 - 22:00', status: 'Approved', location: 'Downtown Tech Hall' },
   { date: '2026-08-11', title: 'Wedding Reception', time: '09:30 - 13:00', status: 'Pending', location: 'Lakeside Manor' },
@@ -9,7 +8,7 @@ const events = [
 ];
 
 export default function Calendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 1)); // Aug 2026 (month is 0-indexed)
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 1)); 
   const [selectedDay, setSelectedDay] = useState(11);
 
   const year = currentDate.getFullYear();
@@ -32,7 +31,6 @@ export default function Calendar() {
   const eventsForDay = (day) => events.filter((e) => e.date === formatDate(day));
   const selectedEvents = eventsForDay(selectedDay);
 
-  // build the grid: blanks for padding + actual day numbers
   const blanks = Array.from({ length: firstWeekday }, () => null);
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const calendarCells = [...blanks, ...days];
@@ -79,7 +77,7 @@ export default function Calendar() {
                         key={i}
                         className={`w-1.5 h-1.5 rounded-full ${
                           e.status === 'Approved' ? 'bg-green-500' : 'bg-yellow-500'
-                        } ${isSelected ? '!bg-white' : ''}`}
+                        } ${isSelected ? 'bg-white' : ''}`}
                       />
                     ))}
                   </div>

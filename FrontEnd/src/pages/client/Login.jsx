@@ -11,7 +11,7 @@ export default function ClientLogin() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // no real auth yet
+    /*Do to real auth*/
     navigate('/client/dashboard');
   };
 
