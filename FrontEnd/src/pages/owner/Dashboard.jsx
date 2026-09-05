@@ -21,7 +21,7 @@ export default function Dashboard() {
          <div key={s.label} className="bg-[#15803d] text-white rounded-lg p-4" >
             <p className="text-sm opacity-90">{s.label}</p>
             <p className="text-2xl font-bold mt-1">{s.value}</p>
-            <p className={`text-xs mt-1 ${s.alert ? 'text-[#FF0000]/[73%]' : 'opacity-80'}`}>{s.note}</p>
+            <p className={`text-xs mt-1 ${s.alert ? 'text-[#FF0000]/[80%]' : 'opacity-80'}`}>{s.note}</p>
           </div>
         ))}
       </div>
