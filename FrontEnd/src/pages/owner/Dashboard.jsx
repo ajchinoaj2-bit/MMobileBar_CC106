@@ -18,7 +18,7 @@ export default function Dashboard() {
       {/* Stat cards */}
       <div className="grid grid-cols-4 gap-5 mb-18">
         {stats.map((s) => (
-        <div key={s.label} className="bg-green-700 text-white rounded-lg p-4">
+         <div key={s.label} className="bg-green-700 text-white rounded-lg p-4">
             <p className="text-sm opacity-90">{s.label}</p>
             <p className="text-2xl font-bold mt-1">{s.value}</p>
             <p className={`text-xs mt-1 ${s.alert ? 'text-red-300' : 'opacity-80'}`}>{s.note}</p>
