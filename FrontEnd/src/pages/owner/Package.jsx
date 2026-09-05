@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FaEdit, FaTrash, FaPlus, FaTimes, FaCloudUploadAlt } from 'react-icons/fa';
+import logo from '../../assets/images/Mdrinks.png';
 
 const initialPackages = [
   {
@@ -65,12 +66,11 @@ export default function Package() {
     setForm({ ...form, [field]: e.target.value });
   };
 
-  // turn a textarea (one item per line) into an array, dropping empty lines
   const linesToArray = (text) =>
     text.split('\n').map((line) => line.trim()).filter(Boolean);
 
   const handleSave = () => {
-    if (!form.title.trim()) return; // basic guard, no empty titles
+    if (!form.title.trim()) return;
 
     const newPackage = {
       id: Date.now(),
@@ -92,12 +92,10 @@ export default function Package() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="h-[calc(100vh-9rem)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          
-        </div>
+      <div className="flex items-center justify-between mb-6 shrink-0">
+        <div></div>
 
         <button
           onClick={() => setShowModal(true)}
@@ -109,10 +107,10 @@ export default function Package() {
       </div>
 
       {/* Package Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-y-auto">
         {packages.map((pkg) => (
-          <div key={pkg.id} className="bg-gray-200 rounded-lg p-5">
-            <div className="flex items-center justify-between mb-">
+          <div key={pkg.id} className="bg-gray-200 rounded-lg p-5 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-bold text-gray-800">{pkg.title}</h2>
               <div className="flex items-center gap-3">
                 <button className="text-gray-700 hover:text-green-700">
@@ -153,12 +151,12 @@ export default function Package() {
               </div>
             </div>
 
-            <div className="bg-white rounded-md h-28 flex items-center justify-center">
-              <span className="text-gray-400 text-xs">Package Image</span>
+            <div className="bg-white rounded-md flex-1 flex items-center justify-center overflow-hidden">
+              <img src={pkg.image || logo} alt={pkg.title} className="h-20 object-contain" />
             </div>
 
             {pkg.notes && (
-              <div className="mt-4">
+              <div className="mt-4 shrink-0">
                 <h3 className="text-xs font-bold text-gray-700">NOTE:</h3>
                 <p className="text-xs text-gray-600 mt-1">{pkg.notes}</p>
               </div>

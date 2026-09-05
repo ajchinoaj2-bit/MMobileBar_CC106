@@ -19,7 +19,7 @@ import BookingForm from './pages/client/BookingForm';
 import BookingConfirmation from './pages/client/BookingConfirmation';
 import Payment from './pages/client/Payment';
 import CBookingHistory from './pages/client/CBookingHistory';
-
+import ClientMessages from './pages/client/Messages';
 
 export default function App() {
   return (
@@ -50,7 +50,7 @@ export default function App() {
           <Route path="booking-confirmation" element={<BookingConfirmation />} />
           <Route path="payment" element={<Payment />} />
           <Route path="booking-history" element={<CBookingHistory />} />
-          
+          <Route path="messages" element={<ClientMessages />} />
         </Route>
       </Routes>
     </BrowserRouter>

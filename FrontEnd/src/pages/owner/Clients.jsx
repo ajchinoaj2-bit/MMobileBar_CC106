@@ -49,15 +49,14 @@ export default function Clients() {
 
   const handleSend = () => {
     if (!draft.trim()) return;
-    // no backend yet — just clear input for now
     setDraft('');
   };
 
   return (
-    <div className="flex h-[calc(100vh-3rem)] -m-6 bg-white">
+    <div className="flex h-[calc(100vh-6rem)] -m-6 bg-white">
       {/* Conversation list */}
       <div className="w-80 border-r flex flex-col">
-        <div className="p-3 border-b">
+        <div className="p-3 border-b shrink-0">
           <div className="relative">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
@@ -93,7 +92,7 @@ export default function Clients() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 border-t">
+        <div className="flex items-center justify-between px-4 py-3 border-t shrink-0">
           <span className="font-semibold text-sm">Conversations</span>
           <FaSlidersH className="text-gray-400" />
         </div>
@@ -101,7 +100,7 @@ export default function Clients() {
 
       {/* Chat window */}
       <div className="flex-1 flex flex-col">
-        <div className="bg-green-700 text-white px-6 py-4 flex justify-between items-center">
+        <div className="bg-green-700 text-white px-6 py-4 h-20 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-3">
             <FaUserCircle className="text-3xl" />
             <div>
@@ -134,7 +133,7 @@ export default function Clients() {
           ))}
         </div>
 
-        <div className="p-4 border-t flex items-center gap-3">
+        <div className="p-4 border-t flex items-center gap-3 shrink-0">
           <input
             type="text"
             placeholder="Type your message..."

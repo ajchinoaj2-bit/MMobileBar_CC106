@@ -45,7 +45,7 @@ export default function Payments() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 px-8 py-7">
+    <div className="h-full w-full overflow-hidden bg-gray-50 px-8 py-7">
 
       {/* PAGE HEADER */}
       <div className="mb-8">
