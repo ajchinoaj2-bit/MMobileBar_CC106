@@ -20,3 +20,12 @@ React
 Vite
 Tailwind CSS
 React Router DOM
+
+--Setup Instructions--
+•Clone the repository.
+•Open the project folder in Visual Studio Code.
+•Open the terminal in the project directory.
+•Run npm install to install the required dependencies.
+•Run npm cd FrontEnd to select that file.
+•Run npm run dev to start the development server.
+•Open the local URL provided in the terminal.
