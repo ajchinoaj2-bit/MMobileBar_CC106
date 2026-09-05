@@ -16,7 +16,7 @@ export default function Dashboard() {
   return (
     <div>
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-8 mb-30">
+      <div className="grid grid-cols-4 gap-5 mb-18">
         {stats.map((s) => (
           <div key={s.label} className="bg-green-1B5E20 text-white rounded-lg p-4">
             <p className="text-sm opacity-90">{s.label}</p>
