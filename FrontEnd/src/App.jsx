@@ -14,7 +14,6 @@ import ClientSignup from './pages/client/Signup';
 import ClientLayout from './layouts/ClientLayout';
 import ClientDashboard from './pages/client/Dashboard';
 import ClientPackage from './pages/client/Package';
-import PackageCustomize from './pages/client/PackageCustomize';
 import BookingForm from './pages/client/BookingForm';
 import BookingConfirmation from './pages/client/BookingConfirmation';
 import Payment from './pages/client/Payment';
@@ -45,7 +44,6 @@ export default function App() {
         <Route path="/client" element={<ClientLayout />}>
           <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="package" element={<ClientPackage />} />
-          <Route path="package-customize" element={<PackageCustomize />} />
           <Route path="booking-form" element={<BookingForm />} />
           <Route path="booking-confirmation" element={<BookingConfirmation />} />
           <Route path="payment" element={<Payment />} />

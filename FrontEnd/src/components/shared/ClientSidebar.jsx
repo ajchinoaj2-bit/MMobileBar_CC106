@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaBoxOpen, FaSlidersH, FaClipboardList, FaHistory, FaSignOutAlt, FaComments } from 'react-icons/fa';
+import { FaHome, FaBoxOpen, FaClipboardList, FaHistory, FaSignOutAlt, FaComments } from 'react-icons/fa';
 import logo from '../../assets/images/Mlogo.png';
 
 const navItems = [
   { name: 'Dashboard', path: '/client/dashboard', icon: <FaHome /> },
   { name: 'Package', path: '/client/package', icon: <FaBoxOpen /> },
-  { name: 'Package customize', path: '/client/package-customize', icon: <FaSlidersH /> },
   { name: 'Booking Form', path: '/client/booking-form', icon: <FaClipboardList /> },
   { name: 'Booking History', path: '/client/booking-history', icon: <FaHistory /> },
   { name: 'Messages', path: '/client/messages', icon: <FaComments /> },
