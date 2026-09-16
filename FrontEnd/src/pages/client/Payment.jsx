@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FaUniversity, FaCheckCircle, FaCloudUploadAlt } from 'react-icons/fa';
 
 const methods = [
@@ -9,13 +8,10 @@ const methods = [
   { id: 'maribank', name: 'Maribank', desc: 'Pay securely using your Maribank account.', tag: 'Secure', color: 'bg-orange-500', icon: 'M' },
 ];
 
-export default function Payment() {
-  const navigate = useNavigate();
+export default function Payment({ amountDue, onCancel, onDone }) {
   const [step, setStep] = useState('select'); // 'select' | 'pay' | 'success'
   const [selectedMethod, setSelectedMethod] = useState('gcash');
   const [proofFile, setProofFile] = useState(null);
-
-  const amountDue = 15000;
 
   const handleFileChange = (e) => {
     setProofFile(e.target.files[0]);
@@ -25,28 +21,24 @@ export default function Payment() {
     setStep('success');
   };
 
-  if (step === 'success') {
-    return (
-      <div className="flex items-center justify-center min-h-[70vh]">
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      {step === 'success' && (
         <div className="bg-white rounded-lg shadow p-8 text-center w-full max-w-sm">
           <FaCheckCircle className="text-green-600 text-5xl mx-auto mb-3" />
           <h2 className="text-xl font-bold">Success</h2>
           <p className="text-gray-500 text-sm mb-5">Booked Successfully!</p>
           <button
-            onClick={() => navigate('/client/dashboard')}
+            onClick={onDone}
             className="w-full bg-green-700 text-white py-2.5 rounded text-sm hover:bg-green-800"
           >
             DONE
           </button>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  if (step === 'pay') {
-    return (
-      <div className="flex justify-center">
-        <div className="bg-white rounded-lg shadow p-6 w-full max-w-md">
+      {step === 'pay' && (
+        <div className="bg-white rounded-lg shadow p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
           <h2 className="text-xl font-bold text-center">Complete Payment</h2>
           <p className="text-gray-500 text-sm text-center mb-4">Complete your transaction to secure your booking.</p>
 
@@ -90,58 +82,55 @@ export default function Payment() {
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  // step === 'select'
-  return (
-    <div className="flex justify-center">
-      <div className="bg-white rounded-lg shadow p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold text-center">Select Payment Method</h2>
-        <p className="text-gray-500 text-sm text-center mb-5">Choose your preferred payment method to continue.</p>
+      {step === 'select' && (
+        <div className="bg-white rounded-lg shadow p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <h2 className="text-xl font-bold text-center">Select Payment Method</h2>
+          <p className="text-gray-500 text-sm text-center mb-5">Choose your preferred payment method to continue.</p>
 
-        <div className="space-y-3 mb-5">
-          {methods.map((m) => (
-            <label
-              key={m.id}
-              className={`flex items-center gap-3 border rounded-lg p-3 cursor-pointer ${
-                selectedMethod === m.id ? 'border-green-600 bg-green-50' : 'border-gray-200'
-              }`}
+          <div className="space-y-3 mb-5">
+            {methods.map((m) => (
+              <label
+                key={m.id}
+                className={`flex items-center gap-3 border rounded-lg p-3 cursor-pointer ${
+                  selectedMethod === m.id ? 'border-green-600 bg-green-50' : 'border-gray-200'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="method"
+                  checked={selectedMethod === m.id}
+                  onChange={() => setSelectedMethod(m.id)}
+                />
+                <div className={`w-8 h-8 rounded flex items-center justify-center text-white font-bold text-xs ${m.color || 'bg-gray-700'}`}>
+                  {m.icon}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">{m.name}</p>
+                  <p className="text-xs text-gray-500">{m.desc}</p>
+                </div>
+                <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded">{m.tag}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onCancel}
+              className="flex-1 border rounded py-2.5 text-sm hover:bg-gray-50"
             >
-              <input
-                type="radio"
-                name="method"
-                checked={selectedMethod === m.id}
-                onChange={() => setSelectedMethod(m.id)}
-              />
-              <div className={`w-8 h-8 rounded flex items-center justify-center text-white font-bold text-xs ${m.color || 'bg-gray-700'}`}>
-                {m.icon}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold">{m.name}</p>
-                <p className="text-xs text-gray-500">{m.desc}</p>
-              </div>
-              <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded">{m.tag}</span>
-            </label>
-          ))}
+              CANCEL
+            </button>
+            <button
+              onClick={() => setStep('pay')}
+              className="flex-1 bg-green-700 text-white py-2.5 rounded text-sm hover:bg-green-800"
+            >
+              CONTINUE
+            </button>
+          </div>
         </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={() => navigate('/client/booking-confirmation')}
-            className="flex-1 border rounded py-2.5 text-sm hover:bg-gray-50"
-          >
-            CANCEL
-          </button>
-          <button
-            onClick={() => setStep('pay')}
-            className="flex-1 bg-green-700 text-white py-2.5 rounded text-sm hover:bg-green-800"
-          >
-            CONTINUE
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

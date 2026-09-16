@@ -1,12 +1,14 @@
+import { useNavigate } from 'react-router-dom';
+
 const packages = [
   {
     id: 1,
-    name: 'The Classic Pour',
-    desc: 'Standard mobile bar setup perfect for small gathering. Includes basic mixers and garnishes.',
+    name: 'The Classic Pour (Package 1)',
+    desc: 'Standard mobile bar setup perfect for small to medium gathering. Includes basic mixers and garnishes.',
   },
   {
     id: 2,
-    name: 'Premium Mixology',
+    name: 'Premium Mixology (Package 2)',
     desc: 'Elevate your event with signature cocktails crafted by our expert mixologists.',
   },
 ];
@@ -19,6 +21,8 @@ const bookingSteps = [
 ];
 
 export default function ClientDashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className="p-6">
       <div className="grid grid-cols-3 gap-8 mt-1">
@@ -31,7 +35,10 @@ export default function ClientDashboard() {
                 <div className="bg-gray-200 h-40 rounded mb-4" />
                 <h3 className="font-semibold text-base">{pkg.name}</h3>
                 <p className="text-gray-500 text-sm mt-2 mb-4">{pkg.desc}</p>
-                <button className="w-full bg-green-700 text-white text-sm py-2.5 rounded hover:bg-green-800">
+                <button
+                  onClick={() => navigate('/client/package')}
+                  className="w-full bg-green-700 text-white text-sm py-2.5 rounded hover:bg-green-800"
+                >
                   View Details
                 </button>
               </div>

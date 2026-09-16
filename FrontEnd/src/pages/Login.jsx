@@ -4,6 +4,7 @@ import Button from '../components/shared/Button';
 import logo from '../assets/images/Mlogo.png';
 
 export default function Login() {
+  const [role, setRole] = useState('owner'); // 'owner' | 'client'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -11,8 +12,8 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // no real auth yet — just routes into the dashboard
-    navigate('/owner/dashboard');
+    // no real auth yet — just routes based on selected role
+    navigate(role === 'owner' ? '/owner/dashboard' : '/client/dashboard');
   };
 
   return (
@@ -25,7 +26,28 @@ export default function Login() {
 
       <div className="bg-[#12261a] rounded-lg p-8 w-full max-w-sm">
         <h2 className="text-white text-xl font-semibold">Welcome Back</h2>
-        <p className="text-gray-400 text-sm mb-6">Sign in to continue to your account</p>
+        <p className="text-gray-400 text-sm mb-4">Sign in to continue to your account</p>
+
+        <div className="flex bg-[#0d1f14] border border-gray-600 rounded-lg p-1 mb-5">
+          <button
+            type="button"
+            onClick={() => setRole('owner')}
+            className={`flex-1 py-1.5 text-sm rounded ${
+              role === 'owner' ? 'bg-green-600 text-white' : 'text-gray-400'
+            }`}
+          >
+            Owner
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('client')}
+            className={`flex-1 py-1.5 text-sm rounded ${
+              role === 'client' ? 'bg-green-600 text-white' : 'text-gray-400'
+            }`}
+          >
+            Client
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -60,11 +82,15 @@ export default function Login() {
             <a href="#" className="text-green-400 hover:underline">Forgot Password?</a>
           </div>
 
-          <Button type="submit" className="w-full">LOG IN</Button>
+          <Button type="submit" className="w-full">
+            LOG IN AS {role === 'owner' ? 'OWNER' : 'CLIENT'}
+          </Button>
 
-          <p className="text-center text-xs text-gray-400">
-            Don't have an account? <Link to="/signup" className="text-red-400 hover:underline">Sign up</Link>
-          </p>
+          {role === 'client' && (
+            <p className="text-center text-xs text-gray-400">
+              Don't have an account? <Link to="/client/signup" className="text-red-400 hover:underline">Sign up</Link>
+            </p>
+          )}
         </form>
       </div>
     </div>

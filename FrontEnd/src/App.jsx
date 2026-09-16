@@ -16,7 +16,6 @@ import ClientDashboard from './pages/client/Dashboard';
 import ClientPackage from './pages/client/Package';
 import BookingForm from './pages/client/BookingForm';
 import BookingConfirmation from './pages/client/BookingConfirmation';
-import Payment from './pages/client/Payment';
 import CBookingHistory from './pages/client/CBookingHistory';
 import ClientMessages from './pages/client/Messages';
 
@@ -46,7 +45,6 @@ export default function App() {
           <Route path="package" element={<ClientPackage />} />
           <Route path="booking-form" element={<BookingForm />} />
           <Route path="booking-confirmation" element={<BookingConfirmation />} />
-          <Route path="payment" element={<Payment />} />
           <Route path="booking-history" element={<CBookingHistory />} />
           <Route path="messages" element={<ClientMessages />} />
         </Route>
@@ -54,4 +52,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

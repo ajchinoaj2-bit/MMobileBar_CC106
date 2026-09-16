@@ -1,24 +1,27 @@
 import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Packages } from '../../constants/Packages';
 
 export default function BookingForm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const pkgId = Number(searchParams.get('pkg')) || 1;
   const selectedPackage = Packages.find((p) => p.id === pkgId) || Packages[0];
 
-  const [form, setForm] = useState({
-    eventName: '',
-    eventType: '',
-    eventDate: '',
-    eventTime: '',
-    location: '',
-    guests: '',
-    requests: '',
-  });
+  const [form, setForm] = useState(
+    location.state?.form || {
+      eventName: '',
+      eventType: '',
+      eventDate: '',
+      eventTime: '',
+      location: '',
+      guests: '',
+      requests: '',
+    }
+  );
 
-  const [selectedAddOns, setSelectedAddOns] = useState([]);
+  const [selectedAddOns, setSelectedAddOns] = useState(location.state?.selectedAddOns || []);
 
   const toggleAddOn = (addOn) => {
     setSelectedAddOns((prev) =>
