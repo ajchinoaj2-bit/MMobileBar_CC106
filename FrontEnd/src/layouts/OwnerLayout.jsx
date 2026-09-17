@@ -12,9 +12,16 @@ const pageTitles = {
   '/owner/payments': { title: 'Payment Management', subtitle: 'Manage your payment methods.' },
 };
 
+function getPageInfo(pathname) {
+  if (/^\/owner\/bookings\/\d+$/.test(pathname)) {
+    return { title: 'Booking Details', subtitle: 'Review client info, event details, and payment status.' };
+  }
+  return pageTitles[pathname] || {};
+}
+
 export default function OwnerLayout() {
   const location = useLocation();
-  const current = pageTitles[location.pathname] || {};
+  const current = getPageInfo(location.pathname);
 
   return (
     <div className="flex">

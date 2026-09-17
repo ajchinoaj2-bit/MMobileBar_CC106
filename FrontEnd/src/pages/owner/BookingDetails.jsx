@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
 
 const bookingData = {
   1: {
@@ -24,6 +25,9 @@ export default function BookingDetails() {
   const navigate = useNavigate();
   const booking = bookingData[id];
 
+  const [status, setStatus] = useState(booking?.status);
+  const [modal, setModal] = useState(null); // null | 'approved' | 'declined' | 'reupload'
+
   if (!booking) {
     return (
       <div>
@@ -33,13 +37,34 @@ export default function BookingDetails() {
     );
   }
 
+  const modalContent = {
+    approved: {
+      title: 'Booking Approved',
+      message: 'The client will be notified that their booking is confirmed.',
+    },
+    declined: {
+      title: 'Booking Declined',
+      message: 'The client will be notified that their booking was declined.',
+    },
+    reupload: {
+      title: 'Re-upload Requested',
+      message: 'The client will be asked to re-upload their proof of payment.',
+    },
+  };
+
+  const closeModal = () => {
+    const wasTerminal = modal === 'approved' || modal === 'declined';
+    setModal(null);
+    if (wasTerminal) navigate('/owner/bookings');
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-4xl font-bold text-green-700">Booking #{booking.bookingId}</h1>
+          <h2 className="text-xl font-bold text-green-700">Booking #{booking.bookingId}</h2>
           <p className="text-gray-500 text-sm">
-            {booking.status} - Submitted {booking.submitted}
+            {status} - Submitted {booking.submitted}
           </p>
         </div>
         <button
@@ -117,7 +142,10 @@ export default function BookingDetails() {
             <div className="border rounded h-40 flex items-center justify-center text-gray-300 text-xs mb-3">
               Payment receipt image
             </div>
-            <button className="w-full border rounded py-2 text-sm mb-2 hover:bg-gray-50">
+            <button
+              onClick={() => setModal('reupload')}
+              className="w-full border rounded py-2 text-sm mb-2 hover:bg-gray-50"
+            >
               Request Re-upload
             </button>
           </div>
@@ -127,19 +155,41 @@ export default function BookingDetails() {
             <div className="text-sm space-y-1 mb-4">
               <p><span className="text-gray-400 text-xs">Client:</span> @{booking.client.name.replace(' ', '')}</p>
               <p><span className="text-gray-400 text-xs">Package:</span> {booking.package.price} | {booking.package.name}</p>
-              <p><span className="text-gray-400 text-xs">Status:</span> {booking.status}</p>
+              <p><span className="text-gray-400 text-xs">Status:</span> {status}</p>
             </div>
             <div className="flex gap-2">
-              <button className="flex-1 border border-red-400 text-red-500 rounded py-2 text-sm hover:bg-red-50">
+              <button
+                onClick={() => { setStatus('Declined'); setModal('declined'); }}
+                className="flex-1 border border-red-400 text-red-500 rounded py-2 text-sm hover:bg-red-50"
+              >
                 Decline
               </button>
-              <button className="flex-1 bg-green-700 text-white rounded py-2 text-sm hover:bg-green-800">
+              <button
+                onClick={() => { setStatus('Approved'); setModal('approved'); }}
+                className="flex-1 bg-green-700 text-white rounded py-2 text-sm hover:bg-green-800"
+              >
                 Approve
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {modal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow p-8 text-center w-full max-w-sm">
+            <FaCheckCircle className="text-green-600 text-5xl mx-auto mb-3" />
+            <h2 className="text-xl font-bold">{modalContent[modal].title}</h2>
+            <p className="text-gray-500 text-sm mb-5">{modalContent[modal].message}</p>
+            <button
+              onClick={closeModal}
+              className="w-full bg-green-700 text-white py-2.5 rounded text-sm hover:bg-green-800"
+            >
+              DONE
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
