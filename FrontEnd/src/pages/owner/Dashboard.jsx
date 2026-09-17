@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const stats = [
   { label: 'Total Bookings', value: '1,248', note: '+8% from last month' },
   { label: 'Total Earnings', value: '₱596,643', note: '+12% from last month' },
@@ -6,7 +8,7 @@ const stats = [
 ];
 
 const notifications = [
-  { title: 'New Booking Request', desc: 'John Dela Cruz requested "Standard Bar Package"', time: '5 mins ago' },
+  { title: 'New Booking Request', desc: 'John Dela Cruz requested "Standard Bar Package"', time: '5 mins ago', link: '/owner/bookings' },
   { title: 'Payment Received', desc: 'Invoice #4321 has been paid in full', time: '2 hours ago' },
   { title: 'New Messages', desc: 'Message from client @JuanDelaCruz', time: '3 hours ago' },
   { title: 'Booking/Payment Approval', desc: 'Awaiting Booking/Payment Approval', time: '1 day ago' },
@@ -41,14 +43,26 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow p-4">
           <div className="flex justify-between items-center mb-3">
             <h2 className="font-semibold">Recent Notifications</h2>
-            <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">New</span>
+            <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded">New</span>
           </div>
           <ul className="space-y-3">
             {notifications.map((n) => (
               <li key={n.title} className="text-sm border-b pb-2 last:border-0">
-                <p className="font-medium">{n.title}</p>
-                <p className="text-gray-500 text-xs">{n.desc}</p>
-                <p className="text-gray-400 text-[10px]">{n.time}</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-medium">{n.title}</p>
+                    <p className="text-gray-500 text-xs">{n.desc}</p>
+                    <p className="text-gray-400 text-[10px]">{n.time}</p>
+                  </div>
+                  {n.link && (
+                    <Link
+                      to={n.link}
+                      className="shrink-0 text-xs bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800"
+                    >
+                      View
+                    </Link>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
