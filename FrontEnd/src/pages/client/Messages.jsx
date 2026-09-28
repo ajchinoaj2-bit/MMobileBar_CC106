@@ -1,26 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaUserCircle, FaPaperclip, FaSlidersH } from 'react-icons/fa';
-
-const conversations = [
-  {
-    id: 1,
-    name: 'Admin',
-    preview: 'Hello, I ordered this package for my event...',
-    time: 'Today',
-    isSystem: false,
-  },
-  {
-    id: 2,
-    name: 'System',
-    preview: 'Your booking confirmation has been sent.',
-    time: 'Yesterday',
-    isSystem: true,
-  },
-];
+import { getThread, sendMessage } from '../../utils/messages';
 
 export default function ClientMessages() {
   const [activeId, setActiveId] = useState(1);
+  const [thread, setThread] = useState([]);
+  const [draft, setDraft] = useState('');
+
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  const clientName = currentUser?.fullname || 'Guest Client';
+
+  const conversations = [
+    { id: 1, name: 'Admin', isSystem: false },
+    { id: 2, name: 'System', isSystem: true, preview: 'Your booking confirmation has been sent.' },
+  ];
+
   const active = conversations.find((c) => c.id === activeId);
+
+  useEffect(() => {
+    if (activeId === 1) {
+      setThread(getThread(clientName));
+    }
+  }, [activeId]);
+
+  const handleSend = () => {
+    if (!draft.trim() || activeId !== 1) return;
+    sendMessage(clientName, 'client', draft);
+    setThread(getThread(clientName));
+    setDraft('');
+  };
 
   return (
     <div className="flex h-[calc(100vh-5.75rem)] -m-6 rounded-lg overflow-hidden border">
@@ -47,9 +55,10 @@ export default function ClientMessages() {
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between">
                   <span className="font-semibold text-sm">{c.name}</span>
-                  <span className="text-xs text-gray-400">{c.time}</span>
                 </div>
-                <p className="text-xs text-gray-500 truncate">{c.preview}</p>
+                <p className="text-xs text-gray-500 truncate">
+                  {c.isSystem ? c.preview : 'Chat with the M Mobile Bar team'}
+                </p>
               </div>
             </button>
           ))}
@@ -79,7 +88,6 @@ export default function ClientMessages() {
           </div>
 
           {active.isSystem ? (
-  
             <div className="flex justify-start">
               <div className="max-w-md bg-white shadow rounded-lg px-4 py-3">
                 <p className="text-sm">{active.preview}</p>
@@ -87,12 +95,24 @@ export default function ClientMessages() {
               </div>
             </div>
           ) : (
-
-            <div className="flex justify-end">
-              <div className="max-w-md bg-green-700 text-white rounded-lg px-4 py-3">
-                <p className="text-sm">{active.preview}</p>
-                <p className="text-xs text-green-100 mt-2 text-right">10:35 AM</p>
-              </div>
+            <div className="space-y-4">
+              {thread.length === 0 && (
+                <p className="text-center text-gray-400 text-sm">No messages yet. Say hello!</p>
+              )}
+              {thread.map((m, i) => (
+                <div key={i} className={`flex ${m.from === 'client' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`max-w-md rounded-lg px-4 py-3 ${
+                      m.from === 'client' ? 'bg-green-700 text-white' : 'bg-white shadow'
+                    }`}
+                  >
+                    <p className="text-sm">{m.text}</p>
+                    <p className={`text-xs mt-2 ${m.from === 'client' ? 'text-green-100 text-right' : 'text-gray-400'}`}>
+                      {m.time}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -104,9 +124,17 @@ export default function ClientMessages() {
           <input
             type="text"
             placeholder="Type your message..."
-            className="flex-1 border rounded px-4 py-2 text-sm"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            disabled={active.isSystem}
+            className="flex-1 border rounded px-4 py-2 text-sm disabled:bg-gray-100"
           />
-          <button className="bg-green-700 text-white px-5 py-2 rounded text-sm font-semibold hover:bg-green-800">
+          <button
+            onClick={handleSend}
+            disabled={active.isSystem}
+            className="bg-green-700 text-white px-5 py-2 rounded text-sm font-semibold hover:bg-green-800 disabled:opacity-50"
+          >
             SEND
           </button>
         </div>

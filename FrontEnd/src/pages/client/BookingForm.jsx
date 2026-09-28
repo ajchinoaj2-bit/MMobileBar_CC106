@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import { Packages } from '../../constants/Packages';
+import { getPackages } from '../../utils/packages';
+import { addBooking } from '../../utils/bookings';
 
 export default function BookingForm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
   const pkgId = Number(searchParams.get('pkg')) || 1;
-  const selectedPackage = Packages.find((p) => p.id === pkgId) || Packages[0];
+
+  const [packages, setPackages] = useState([]);
+  useEffect(() => {
+    setPackages(getPackages());
+  }, []);
+
+  const selectedPackage = packages.find((p) => p.id === pkgId) || packages[0] || {
+    title: '', price: '0', addOns: [],
+  };
 
   const [form, setForm] = useState(
     location.state?.form || {
@@ -35,8 +44,19 @@ export default function BookingForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const newBooking = addBooking({
+      client: JSON.parse(localStorage.getItem('currentUser') || 'null')?.fullname || 'Guest Client',
+      event: form.eventName,
+      date: form.eventDate,
+      package: selectedPackage.title,
+      price: Number(String(selectedPackage.price).replace(/,/g, '')),
+      addOns: selectedAddOns,
+      form,
+    });
+
     navigate(`/client/booking-confirmation?pkg=${pkgId}`, {
-      state: { form, selectedAddOns },
+      state: { form, selectedAddOns, bookingId: newBooking.id },
     });
   };
 
@@ -163,7 +183,7 @@ export default function BookingForm() {
           <div className="bg-white rounded-lg shadow p-4">
             <p className="text-sm font-semibold text-green-700 mb-2">Add ons</p>
             <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto pr-1">
-              {selectedPackage.addOns.map((addOn) => (
+              {(selectedPackage.addOns || []).map((addOn) => (
                 <label
                   key={addOn}
                   className="flex items-center gap-2 border rounded px-2 py-1.5 text-xs cursor-pointer"

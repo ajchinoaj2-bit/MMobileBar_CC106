@@ -9,7 +9,6 @@ import Payments from './pages/owner/Payments';
 import BookingHistory from './pages/owner/BookingHistory';
 import Calendar from './pages/owner/Calendar';
 import BookingDetails from './pages/owner/BookingDetails';
-import ClientLogin from './pages/client/Login';
 import ClientSignup from './pages/client/Signup';
 import ClientLayout from './layouts/ClientLayout';
 import ClientDashboard from './pages/client/Dashboard';
@@ -17,7 +16,10 @@ import ClientPackage from './pages/client/Package';
 import BookingForm from './pages/client/BookingForm';
 import BookingConfirmation from './pages/client/BookingConfirmation';
 import CBookingHistory from './pages/client/CBookingHistory';
+import CBookingDetails from './pages/client/CBookingDetails';
 import ClientMessages from './pages/client/Messages';
+import AccountSettings from './pages/client/AccountSettings';
+import ProtectedRoute from './components/shared/ProtectedRoute';
 
 export default function App() {
   return (
@@ -25,7 +27,14 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
 
-        <Route path="owner" element={<OwnerLayout />}>
+        <Route
+          path="owner"
+          element={
+            <ProtectedRoute role="owner">
+              <OwnerLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="bookings" element={<Bookings />} />
           <Route path="package" element={<Package />} />
@@ -36,17 +45,24 @@ export default function App() {
           <Route path="bookings/:id" element={<BookingDetails />} />
         </Route>
 
-        <Route path="/client/login" element={<ClientLogin />} />
         <Route path="/client/signup" element={<ClientSignup />} />
 
-
-        <Route path="/client" element={<ClientLayout />}>
+        <Route
+          path="/client"
+          element={
+            <ProtectedRoute role="client">
+              <ClientLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="dashboard" element={<ClientDashboard />} />
           <Route path="package" element={<ClientPackage />} />
           <Route path="booking-form" element={<BookingForm />} />
           <Route path="booking-confirmation" element={<BookingConfirmation />} />
           <Route path="booking-history" element={<CBookingHistory />} />
+          <Route path="booking-history/:id" element={<CBookingDetails />} />
           <Route path="messages" element={<ClientMessages />} />
+          <Route path="settings" element={<AccountSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,6 +1,7 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FaHome, FaCalendarAlt, FaBoxOpen, FaUsers, FaMoneyBillWave, FaSignOutAlt } from 'react-icons/fa';
 import logo from '../../assets/images/Mlogo.png';
+import { logout } from '../../utils/auth';
 
 const navItems = [
   { name: 'Dashboard', path: '/owner/dashboard', icon: <FaHome /> },
@@ -11,6 +12,13 @@ const navItems = [
 ];
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <aside className="w-60 h-screen bg-[#0d1f14] text-white flex flex-col justify-between fixed left-0 top-0">
       <div>
@@ -37,7 +45,10 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <button className="flex items-center gap-3 px-6 py-4 text-sm text-gray-300 hover:bg-[#14301d]">
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 px-6 py-4 text-sm text-gray-300 hover:bg-[#14301d]"
+      >
         <FaSignOutAlt /> Logout
       </button>
     </aside>

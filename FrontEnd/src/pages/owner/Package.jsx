@@ -1,52 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaEdit, FaTrash, FaPlus, FaTimes, FaCloudUploadAlt } from 'react-icons/fa';
 import logo from '../../assets/images/Mdrinks.png';
-
-const initialPackages = [
-  {
-    id: 1,
-    title: 'Package 1',
-    description: [
-      '100–150 shots of the M Mobile Bar selection of shooters, shakers and flavors',
-      '100–150 glasses of M Mobile Bar cocktails',
-      'Tequila & syringe shots',
-    ],
-    price: '₱12,500',
-    inclusions: [
-      'A set of lighted bar counters',
-      'Presented by a professional bartender',
-      'On the spot cocktail mixing every drink served',
-      'Customized drink list',
-      'Complete set of liquor bar setup, equipment and bar glasses',
-    ],
-    addOns: [
-      'Welcome drink (non alcoholic) upon guest arrived',
-      'Coffee and Tea',
-      'Case of SMB lights',
-    ],
-    notes: 'Transportation may be charged separately.',
-  },
-  {
-    id: 2,
-    title: 'Package 2',
-    description: [
-      '190–250 shots of the M Mobile Bar selection of shooters, shakers and flavors',
-      '190–250 glasses of M Mobile Bar cocktails',
-      'Tequila & syringe shots',
-    ],
-    price: '₱13,500',
-    inclusions: [
-      'A set of lighted bar counters',
-      'Presented by a professional bartender',
-      'On the spot cocktail mixing every drink served',
-    ],
-    addOns: [
-      'Welcome drink (non alcoholic) upon guest arrived',
-      'Coffee and Tea',
-    ],
-    notes: 'Transportation may be charged separately.',
-  },
-];
+import { getPackages, addPackage, updatePackage, deletePackage } from '../../utils/packages';
 
 const emptyForm = {
   title: '',
@@ -57,38 +12,71 @@ const emptyForm = {
   addOns: '',
 };
 
+const linesToArray = (text) =>
+  text.split('\n').map((line) => line.trim()).filter(Boolean);
+
+const arrayToLines = (arr) => (arr || []).join('\n');
+
 export default function Package() {
-  const [packages, setPackages] = useState(initialPackages);
+  const [packages, setPackages] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    setPackages(getPackages());
+  }, []);
 
   const handleChange = (field) => (e) => {
     setForm({ ...form, [field]: e.target.value });
   };
 
-  const linesToArray = (text) =>
-    text.split('\n').map((line) => line.trim()).filter(Boolean);
+  const openAddModal = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  };
+
+  const openEditModal = (pkg) => {
+    setEditingId(pkg.id);
+    setForm({
+      title: pkg.title,
+      description: arrayToLines(pkg.description),
+      price: pkg.price,
+      note: pkg.notes || '',
+      inclusions: arrayToLines(pkg.inclusions),
+      addOns: arrayToLines(pkg.addOns),
+    });
+    setShowModal(true);
+  };
 
   const handleSave = () => {
     if (!form.title.trim()) return;
 
-    const newPackage = {
-      id: Date.now(),
+    const packageData = {
       title: form.title,
       description: linesToArray(form.description),
-      price: form.price,
+      price: form.price.replace(/[₱,]/g, ''), // store as plain number string, e.g. "12500"
       inclusions: linesToArray(form.inclusions),
       addOns: linesToArray(form.addOns),
       notes: form.note,
     };
 
-    setPackages([...packages, newPackage]);
+    if (editingId) {
+      updatePackage(editingId, packageData);
+    } else {
+      addPackage(packageData);
+    }
+
+    setPackages(getPackages());
     setForm(emptyForm);
+    setEditingId(null);
     setShowModal(false);
   };
 
   const handleDelete = (id) => {
-    setPackages(packages.filter((p) => p.id !== id));
+    deletePackage(id);
+    setPackages(getPackages());
   };
 
   return (
@@ -98,7 +86,7 @@ export default function Package() {
         <div></div>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={openAddModal}
           className="flex items-center gap-2 bg-black text-white text-sm px-4 py-2 rounded-md hover:bg-gray-800"
         >
           <FaPlus />
@@ -113,7 +101,10 @@ export default function Package() {
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-bold text-gray-800">{pkg.title}</h2>
               <div className="flex items-center gap-3">
-                <button className="text-gray-700 hover:text-green-700">
+                <button
+                  onClick={() => openEditModal(pkg)}
+                  className="text-gray-700 hover:text-green-700"
+                >
                   <FaEdit />
                 </button>
                 <button
@@ -128,26 +119,26 @@ export default function Package() {
             <div className="mb-5">
               <h3 className="text-xs font-bold text-gray-700 mb-2">Short Description</h3>
               <div className="bg-white rounded-md p-3 text-xs text-gray-600 space-y-1">
-                {pkg.description.map((item, i) => <p key={i}>• {item}</p>)}
+                {(pkg.description || []).map((item, i) => <p key={i}>• {item}</p>)}
               </div>
             </div>
 
             <div className="mb-5">
               <h3 className="text-xs font-bold text-gray-700 mb-2">Price</h3>
-              <div className="bg-white rounded-md px-3 py-2 text-sm text-gray-700">{pkg.price}</div>
+              <div className="bg-white rounded-md px-3 py-2 text-sm text-gray-700">₱{pkg.price}</div>
             </div>
 
             <div className="mb-5">
               <h3 className="text-xs font-bold text-gray-700 mb-2">All Package Inclusion</h3>
               <div className="bg-white rounded-md p-3 text-xs text-gray-600 space-y-1">
-                {pkg.inclusions.map((item, i) => <p key={i}>• {item}</p>)}
+                {(pkg.inclusions || []).map((item, i) => <p key={i}>• {item}</p>)}
               </div>
             </div>
 
             <div className="mb-5">
               <h3 className="text-xs font-bold text-gray-700 mb-2">Add Ons</h3>
               <div className="bg-white rounded-md p-3 text-xs text-gray-600 space-y-1">
-                {pkg.addOns.map((item, i) => <p key={i}>• {item}</p>)}
+                {(pkg.addOns || []).map((item, i) => <p key={i}>• {item}</p>)}
               </div>
             </div>
 
@@ -165,13 +156,18 @@ export default function Package() {
         ))}
       </div>
 
-      {/* Add New Package Modal */}
+      {/* Add/Edit Package Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-[480px] max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">Package Title</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-black">
+              <h2 className="text-lg font-bold text-gray-800">
+                {editingId ? 'Edit Package' : 'Add New Package'}
+              </h2>
+              <button
+                onClick={() => { setShowModal(false); setEditingId(null); }}
+                className="text-gray-500 hover:text-black"
+              >
                 <FaTimes />
               </button>
             </div>
@@ -206,7 +202,7 @@ export default function Package() {
                     type="text"
                     value={form.price}
                     onChange={handleChange('price')}
-                    placeholder="e.g. ₱10,000"
+                    placeholder="e.g. 10,000"
                     className="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-600"
                   />
                 </div>
@@ -256,7 +252,7 @@ export default function Package() {
 
             <div className="mt-6 flex justify-end gap-3">
               <button
-                onClick={() => { setShowModal(false); setForm(emptyForm); }}
+                onClick={() => { setShowModal(false); setEditingId(null); setForm(emptyForm); }}
                 className="rounded border border-gray-400 px-5 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 Cancel
@@ -265,7 +261,7 @@ export default function Package() {
                 onClick={handleSave}
                 className="rounded bg-[#063d27] px-5 py-2 text-sm font-medium text-white hover:bg-[#075536]"
               >
-                Save Package
+                {editingId ? 'Update Package' : 'Save Package'}
               </button>
             </div>
           </div>

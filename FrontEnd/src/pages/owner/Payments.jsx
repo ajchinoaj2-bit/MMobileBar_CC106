@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FaWallet,
   FaCheckCircle,
@@ -9,9 +9,23 @@ import {
   FaUniversity,
   FaPaypal,
 } from 'react-icons/fa';
+import { getBookings } from '../../utils/bookings';
 
 export default function Payments() {
   const [showModal, setShowModal] = useState(false);
+  const [bookings, setBookings] = useState([]);
+
+  useEffect(() => {
+    setBookings(getBookings());
+  }, []);
+
+  const sumBy = (status) =>
+    bookings.filter((b) => b.status === status).reduce((sum, b) => sum + (b.price || 0), 0);
+
+  const completed = sumBy('Approved');
+  const pending = sumBy('Pending');
+  const refunded = sumBy('Declined');
+  const total = completed + pending;
 
   const paymentMethods = [
     {
@@ -62,7 +76,7 @@ export default function Payments() {
           </div>
 
           <p className="mt-2 text-[24px] font-bold text-black">
-            $125,800.00
+            ₱{total.toLocaleString()}.00
           </p>
 
           <p className="text-sm text-gray-500">
@@ -78,7 +92,7 @@ export default function Payments() {
           </div>
 
           <p className="mt-2 text-[24px] font-bold text-black">
-            $100,800.00
+            ₱{completed.toLocaleString()}.00
           </p>
 
           <p className="text-sm text-gray-500">
@@ -94,7 +108,7 @@ export default function Payments() {
           </div>
 
           <p className="mt-2 text-[24px] font-bold text-black">
-            $18,800.00
+            ₱{pending.toLocaleString()}.00
           </p>
 
           <p className="text-sm text-gray-500">
@@ -110,7 +124,7 @@ export default function Payments() {
           </div>
 
           <p className="mt-2 text-[24px] font-bold text-black">
-            $5,800.00
+            ₱{refunded.toLocaleString()}.00
           </p>
 
           <p className="text-sm text-gray-500">

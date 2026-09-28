@@ -1,12 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const history = [
-  { id: 1, event: 'Corporate Mixer', client: 'Acme Corp / John Smith', date: 'Oct 15, 2023', time: '6:00 PM - 10:00 PM', revenue: '₱1,250.00', status: 'Completed' },
-  { id: 2, event: 'Wedding Reception', client: 'Sarah & James', date: 'Sep 28, 2023', time: '4:00 PM - 9:00 PM', revenue: '₱0.00', status: 'Cancelled' },
-  { id: 3, event: 'Birthday Bash 40th', client: 'Mike Johnson', date: 'Sep 12, 2023', time: '8:00 PM - 12:00 AM', revenue: '₱850.00', status: 'Completed' },
-  { id: 4, event: 'Summer Festival VIP', client: 'City Events Co.', date: 'Aug 06, 2023', time: '12:00 PM - 8:00 PM', revenue: '₱3,400.00', status: 'Completed' },
-];
+import { getBookings } from '../../utils/bookings';
 
 const statusStyle = {
   Completed: { dot: 'bg-green-500', text: 'text-green-700' },
@@ -15,9 +9,26 @@ const statusStyle = {
 
 export default function BookingHistory() {
   const [clientFilter, setClientFilter] = useState('');
+  const [bookings, setBookings] = useState([]);
+
+  useEffect(() => {
+    setBookings(getBookings());
+  }, []);
+
+  const history = bookings
+    .filter((b) => b.status === 'Approved' || b.status === 'Declined')
+    .map((b) => ({
+      id: b.id,
+      event: b.event || 'Untitled Event',
+      client: b.client,
+      date: b.form?.eventDate || '—',
+      time: b.form?.eventTime || '—',
+      revenue: b.status === 'Approved' ? `₱${(b.price || 0).toLocaleString()}.00` : '₱0.00',
+      status: b.status === 'Approved' ? 'Completed' : 'Cancelled',
+    }));
 
   const filtered = history.filter((h) =>
-    h.client.toLowerCase().includes(clientFilter.toLowerCase())
+    (h.client || '').toLowerCase().includes(clientFilter.toLowerCase())
   );
 
   return (
@@ -51,30 +62,38 @@ export default function BookingHistory() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((h) => (
-              <tr key={h.id} className="border-t">
-                <td className="px-4 py-3">
-                  <span className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${statusStyle[h.status].dot}`} />
-                    <span className={statusStyle[h.status].text}>{h.status}</span>
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <p className="font-medium">{h.event}</p>
-                  <p className="text-gray-400 text-xs">{h.client}</p>
-                </td>
-                <td className="px-4 py-3">
-                  <p>{h.date}</p>
-                  <p className="text-gray-400 text-xs">{h.time}</p>
-                </td>
-                <td className="px-4 py-3">{h.revenue}</td>
-                <td className="px-4 py-3">
-                  <Link to={`/owner/bookings/${h.id}`} className="text-green-700 text-xs underline">
-                    {h.status === 'Cancelled' ? 'Details' : 'View Summary'}
-                  </Link>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                  No booking history yet.
                 </td>
               </tr>
-            ))}
+            ) : (
+              filtered.map((h) => (
+                <tr key={h.id} className="border-t">
+                  <td className="px-4 py-3">
+                    <span className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${statusStyle[h.status].dot}`} />
+                      <span className={statusStyle[h.status].text}>{h.status}</span>
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium">{h.event}</p>
+                    <p className="text-gray-400 text-xs">{h.client}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p>{h.date}</p>
+                    <p className="text-gray-400 text-xs">{h.time}</p>
+                  </td>
+                  <td className="px-4 py-3">{h.revenue}</td>
+                  <td className="px-4 py-3">
+                    <Link to={`/owner/bookings/${h.id}`} className="text-green-700 text-xs underline">
+                      {h.status === 'Cancelled' ? 'Details' : 'View Summary'}
+                    </Link>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

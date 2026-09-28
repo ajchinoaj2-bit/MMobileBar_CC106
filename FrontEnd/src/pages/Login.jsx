@@ -2,17 +2,25 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../components/shared/Button';
 import logo from '../assets/images/Mlogo.png';
+import { login } from '../utils/auth';
 
 export default function Login() {
   const [role, setRole] = useState('owner'); // 'owner' | 'client'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
+  const [error, setError] = useState('');
+  const [showForgotModal, setShowForgotModal] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // no real auth yet — just routes based on selected role
+    const result = login(email, password, role);
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
+    setError('');
     navigate(role === 'owner' ? '/owner/dashboard' : '/client/dashboard');
   };
 
@@ -31,7 +39,7 @@ export default function Login() {
         <div className="flex bg-[#0d1f14] border border-gray-600 rounded-lg p-1 mb-5">
           <button
             type="button"
-            onClick={() => setRole('owner')}
+            onClick={() => { setRole('owner'); setError(''); }}
             className={`flex-1 py-1.5 text-sm rounded ${
               role === 'owner' ? 'bg-green-600 text-white' : 'text-gray-400'
             }`}
@@ -40,7 +48,7 @@ export default function Login() {
           </button>
           <button
             type="button"
-            onClick={() => setRole('client')}
+            onClick={() => { setRole('client'); setError(''); }}
             className={`flex-1 py-1.5 text-sm rounded ${
               role === 'client' ? 'bg-green-600 text-white' : 'text-gray-400'
             }`}
@@ -58,7 +66,6 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email address"
               className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-              required
             />
           </div>
 
@@ -70,16 +77,23 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-              required
             />
           </div>
+
+          {error && <p className="text-red-400 text-xs">{error}</p>}
 
           <div className="flex justify-between items-center text-xs text-gray-400">
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
               Remember me
             </label>
-            <a href="#" className="text-green-400 hover:underline">Forgot Password?</a>
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(true)}
+              className="text-green-400 hover:underline"
+            >
+              Forgot Password?
+            </button>
           </div>
 
           <Button type="submit" className="w-full">
@@ -93,6 +107,23 @@ export default function Login() {
           )}
         </form>
       </div>
+
+      {showForgotModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow p-6 text-center w-full max-w-sm">
+            <h2 className="text-lg font-bold text-gray-800 mb-2">Password Reset Unavailable</h2>
+            <p className="text-sm text-gray-500 mb-5">
+              Password reset isn't available yet. Please contact the M Mobile Bar team directly for help accessing your account.
+            </p>
+            <button
+              onClick={() => setShowForgotModal(false)}
+              className="w-full bg-green-700 text-white py-2.5 rounded text-sm hover:bg-green-800"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

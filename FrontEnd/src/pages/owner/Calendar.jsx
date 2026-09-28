@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-
-const events = [
-  { date: '2026-08-11', title: 'Corporate Mixer', time: '18:00 - 22:00', status: 'Approved', location: 'Downtown Tech Hall' },
-  { date: '2026-08-11', title: 'Wedding Reception', time: '09:30 - 13:00', status: 'Pending', location: 'Lakeside Manor' },
-  { date: '2026-08-17', title: 'Birthday Bash', time: '19:00 - 23:00', status: 'Approved', location: 'Private Residence' },
-];
+import { getBookings } from '../../utils/bookings';
 
 export default function Calendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 1)); 
-  const [selectedDay, setSelectedDay] = useState(11);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const bookings = getBookings();
+    // map real bookings into the shape this page expects
+    const mapped = bookings
+      .filter((b) => b.form?.eventDate) // only ones with a real date
+      .map((b) => ({
+        date: b.form.eventDate, // already 'YYYY-MM-DD' from <input type="date">
+        title: b.event || 'Untitled Event',
+        time: b.form.eventTime || '',
+        status: b.status === 'Approved' ? 'Approved' : 'Pending',
+        location: b.form.location || '—',
+      }));
+    setEvents(mapped);
+  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -35,12 +46,14 @@ export default function Calendar() {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const calendarCells = [...blanks, ...days];
 
-  const totalBookings = events.length;
-  const approved = events.filter((e) => e.status === 'Approved').length;
-  const pending = events.filter((e) => e.status === 'Pending').length;
+  // Month Overview should reflect only events in the currently viewed month
+  const eventsThisMonth = events.filter((e) => e.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`));
+  const totalBookings = eventsThisMonth.length;
+  const approved = eventsThisMonth.filter((e) => e.status === 'Approved').length;
+  const pending = eventsThisMonth.filter((e) => e.status === 'Pending').length;
 
   return (
-    <div> 
+    <div>
       <div className="grid grid-cols-3 gap-6">
         {/* Calendar grid */}
         <div className="col-span-2 bg-white rounded-lg shadow p-4">
@@ -106,7 +119,6 @@ export default function Calendar() {
                 <p className="font-medium mt-1">{e.title}</p>
                 <p className="text-gray-400 text-xs">{e.time}</p>
                 <p className="text-gray-400 text-xs">{e.location}</p>
-                <button className="text-green-700 text-xs mt-1 underline">View Details</button>
               </div>
             ))}
           </div>

@@ -1,56 +1,65 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaSearch, FaUserCircle, FaCalendarAlt, FaEllipsisV, FaPaperclip, FaSlidersH } from 'react-icons/fa';
-
-const conversations = [
-  {
-    id: 1,
-    name: 'Sarah Jenkins',
-    event: 'Summer Gala - Oct 12',
-    lastMsg: 'Can we update the drink menu for the reception?',
-    time: '10:42 AM',
-    messages: [
-      { from: 'them', text: 'Hi there! We were looking over the proposed cocktail list for the reception.', time: '10:30 AM' },
-      { from: 'me', text: 'Hello Sarah. Yes, I have the list in front of me. Did you have any changes in mind?', time: '10:35 AM' },
-      { from: 'them', text: "Can we update the drink menu for the reception? We'd like to swap the Margarita for a Mojito if possible.", time: '10:42 AM' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'David Miller (Corporate)',
-    event: '',
-    lastMsg: 'Invoice received, thank you.',
-    time: 'Yesterday',
-    messages: [
-      { from: 'them', text: 'Invoice received, thank you.', time: 'Yesterday' },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Emma & Liam Wedding',
-    event: '',
-    lastMsg: 'We need to discuss the timeline.',
-    time: 'Mon',
-    messages: [
-      { from: 'them', text: 'We need to discuss the timeline.', time: 'Mon' },
-    ],
-  },
-];
+import { getBookings } from '../../utils/bookings';
+import { getThread, sendMessage } from '../../utils/messages';
 
 export default function Clients() {
-  const [selectedId, setSelectedId] = useState(1);
+  const [clients, setClients] = useState([]);
+  const [selectedName, setSelectedName] = useState(null);
   const [search, setSearch] = useState('');
   const [draft, setDraft] = useState('');
+  const [thread, setThread] = useState([]);
 
-  const selected = conversations.find((c) => c.id === selectedId);
+  useEffect(() => {
+    const bookings = getBookings();
+    const uniqueClients = [...new Set(bookings.map((b) => b.client))];
 
-  const filtered = conversations.filter((c) =>
+    const list = uniqueClients.map((name) => {
+      const clientBookings = bookings.filter((b) => b.client === name);
+      const latestBooking = clientBookings[clientBookings.length - 1];
+      const clientThread = getThread(name);
+      const lastMsg = clientThread[clientThread.length - 1];
+
+      return {
+        name,
+        event: latestBooking ? `${latestBooking.event} - ${latestBooking.form?.eventDate || ''}` : '',
+        lastMsg: lastMsg ? lastMsg.text : 'No messages yet.',
+        time: lastMsg ? lastMsg.time : latestBooking?.submitted || '',
+      };
+    });
+
+    setClients(list);
+    if (list.length > 0 && !selectedName) {
+      setSelectedName(list[0].name);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedName) {
+      setThread(getThread(selectedName));
+    }
+  }, [selectedName]);
+
+  const selected = clients.find((c) => c.name === selectedName);
+
+  const filtered = clients.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleSend = () => {
-    if (!draft.trim()) return;
+    if (!draft.trim() || !selectedName) return;
+    sendMessage(selectedName, 'owner', draft);
+    setThread(getThread(selectedName));
     setDraft('');
   };
+
+  if (!selected) {
+    return (
+      <div className="flex h-[calc(100vh-6rem)] -m-6 bg-white items-center justify-center">
+        <p className="text-gray-400 text-sm">No client conversations yet. They'll appear here once a client submits a booking.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-6rem)] -m-6 bg-white">
@@ -72,10 +81,10 @@ export default function Clients() {
         <div className="flex-1 overflow-y-auto">
           {filtered.map((c) => (
             <button
-              key={c.id}
-              onClick={() => setSelectedId(c.id)}
+              key={c.name}
+              onClick={() => setSelectedName(c.name)}
               className={`w-full flex items-start gap-3 px-4 py-3 text-left border-l-4 ${
-                c.id === selectedId ? 'bg-green-50 border-green-600' : 'border-transparent hover:bg-gray-50'
+                c.name === selectedName ? 'bg-green-50 border-green-600' : 'border-transparent hover:bg-gray-50'
               }`}
             >
               <FaUserCircle className="text-gray-300 text-2xl mt-1" />
@@ -84,7 +93,7 @@ export default function Clients() {
                   <span className="font-semibold text-sm truncate">{c.name}</span>
                   <span className="text-xs text-gray-400">{c.time}</span>
                 </div>
-                <p className={`text-xs truncate ${c.id === selectedId ? 'text-gray-700' : 'text-gray-500'}`}>
+                <p className={`text-xs truncate ${c.name === selectedName ? 'text-gray-700' : 'text-gray-500'}`}>
                   {c.lastMsg}
                 </p>
               </div>
@@ -119,11 +128,15 @@ export default function Clients() {
             <span className="bg-gray-200 text-gray-500 text-xs px-3 py-1 rounded-full">Today</span>
           </div>
 
-          {selected.messages.map((m, i) => (
-            <div key={i} className={`flex flex-col ${m.from === 'me' ? 'items-end' : 'items-start'}`}>
+          {thread.length === 0 && (
+            <p className="text-center text-gray-400 text-sm">No messages yet. Say hello!</p>
+          )}
+
+          {thread.map((m, i) => (
+            <div key={i} className={`flex flex-col ${m.from === 'owner' ? 'items-end' : 'items-start'}`}>
               <div
                 className={`max-w-md px-4 py-2 rounded-lg text-sm ${
-                  m.from === 'me' ? 'bg-gray-700 text-white' : 'bg-white border'
+                  m.from === 'owner' ? 'bg-gray-700 text-white' : 'bg-white border'
                 }`}
               >
                 {m.text}

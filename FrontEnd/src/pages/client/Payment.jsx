@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FaUniversity, FaCheckCircle, FaCloudUploadAlt } from 'react-icons/fa';
+import { attachPaymentProof } from '../../utils/bookings';
 
 const methods = [
   { id: 'gcash', name: 'GCash', desc: 'Pay easily using your GCash account.', tag: 'Fast & Secure', color: 'bg-blue-500', icon: 'G' },
@@ -8,16 +9,26 @@ const methods = [
   { id: 'maribank', name: 'Maribank', desc: 'Pay securely using your Maribank account.', tag: 'Secure', color: 'bg-orange-500', icon: 'M' },
 ];
 
-export default function Payment({ amountDue, onCancel, onDone }) {
+export default function Payment({ amountDue, bookingId, onCancel, onDone }) {
   const [step, setStep] = useState('select'); // 'select' | 'pay' | 'success'
   const [selectedMethod, setSelectedMethod] = useState('gcash');
   const [proofFile, setProofFile] = useState(null);
+  const [proofPreview, setProofPreview] = useState(null);
 
   const handleFileChange = (e) => {
-    setProofFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setProofFile(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setProofPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmitPayment = () => {
+    if (proofPreview && bookingId) {
+      attachPaymentProof(bookingId, proofPreview);
+    }
     setStep('success');
   };
 
@@ -44,7 +55,7 @@ export default function Payment({ amountDue, onCancel, onDone }) {
 
           <div className="bg-green-100 rounded-lg text-center py-4 mb-4">
             <p className="text-xs text-green-700 uppercase">Amount to Pay</p>
-            <p className="text-2xl font-bold text-green-800">${amountDue.toLocaleString()}.00</p>
+            <p className="text-2xl font-bold text-green-800">₱{amountDue.toLocaleString()}.00</p>
           </div>
 
           <div className="flex items-center gap-2 mb-2">

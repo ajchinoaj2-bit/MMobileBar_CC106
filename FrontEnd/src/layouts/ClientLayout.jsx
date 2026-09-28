@@ -5,17 +5,23 @@ import TopBar from '../components/shared/TopBar';
 const pageTitles = {
   '/client/dashboard': { title: 'Welcome back, Client', subtitle: 'Here is an overview of your bookings and available packages.' },
   '/client/package': { title: 'Available Packages', subtitle: 'Choose the perfect bar package for your event.' },
-  '/client/package-customize': { title: 'Customize Your Experience', subtitle: 'Tailor your package to fit your event needs.' },
   '/client/booking-form': { title: 'Book Your Event', subtitle: 'Fill in your event details below.' },
   '/client/booking-confirmation': { title: 'Booking Confirmation', subtitle: 'Please review your booking details before proceeding to payment.' },
-  '/client/payment': { title: 'Payment', subtitle: '' },
   '/client/booking-history': { title: 'Booking History', subtitle: 'Track the status of your upcoming and past events.' },
   '/client/messages': { title: 'Messages', subtitle: 'Chat with the M Mobile Bar team' },
+  '/client/settings': { title: 'Account Settings', subtitle: 'Update your profile information and password.' },
 };
+
+function getPageInfo(pathname) {
+  if (/^\/client\/booking-history\/\d+$/.test(pathname)) {
+    return { title: 'Booking Details', subtitle: 'Review your event details and booking status.' };
+  }
+  return pageTitles[pathname] || {};
+}
 
 export default function ClientLayout() {
   const location = useLocation();
-  const current = pageTitles[location.pathname] || {};
+  const current = getPageInfo(location.pathname);
 
   return (
     <div className="flex">

@@ -2,28 +2,34 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../../components/shared/Button';
 import logo from '../../assets/images/Mlogo.png';
+import { signup, validateSignup } from '../../utils/auth';
 
 export default function ClientSignup() {
   const [form, setForm] = useState({
     fullname: '', username: '', email: '', password: '', confirmPassword: '',
   });
   const [agree, setAgree] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const handleChange = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (form.password !== form.confirmPassword) {
-      alert("Passwords don't match");
-      return;
-    }
+
+    const validationErrors = validateSignup(form);
     if (!agree) {
-      alert('Please agree to the Terms of Service and Privacy Policy');
+      validationErrors.agree = 'You must agree to the Terms of Service and Privacy Policy.';
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
-    /*To do real registration*/
-    navigate('/client/login');
+
+    setErrors({});
+    signup(form);
+    navigate('/');
   };
 
   return (
@@ -48,8 +54,8 @@ export default function ClientSignup() {
                 onChange={handleChange('fullname')}
                 placeholder="Enter your fullname"
                 className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-                required
               />
+              {errors.fullname && <p className="text-red-400 text-[10px] mt-1">{errors.fullname}</p>}
             </div>
             <div>
               <label className="text-gray-300 text-xs block mb-1">Username</label>
@@ -59,8 +65,8 @@ export default function ClientSignup() {
                 onChange={handleChange('username')}
                 placeholder="Enter your username"
                 className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-                required
               />
+              {errors.username && <p className="text-red-400 text-[10px] mt-1">{errors.username}</p>}
             </div>
           </div>
 
@@ -72,8 +78,8 @@ export default function ClientSignup() {
               onChange={handleChange('email')}
               placeholder="Enter your email"
               className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-              required
             />
+            {errors.email && <p className="text-red-400 text-[10px] mt-1">{errors.email}</p>}
           </div>
 
           <div>
@@ -82,10 +88,10 @@ export default function ClientSignup() {
               type="password"
               value={form.password}
               onChange={handleChange('password')}
-              placeholder="Enter your password"
+              placeholder="At least 8 characters, letters and numbers"
               className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-              required
             />
+            {errors.password && <p className="text-red-400 text-[10px] mt-1">{errors.password}</p>}
           </div>
 
           <div>
@@ -96,19 +102,20 @@ export default function ClientSignup() {
               onChange={handleChange('confirmPassword')}
               placeholder="Confirm your password"
               className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-              required
             />
+            {errors.confirmPassword && <p className="text-red-400 text-[10px] mt-1">{errors.confirmPassword}</p>}
           </div>
 
           <label className="flex items-center gap-2 text-xs text-gray-400">
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-            I agree to the <a href="#" className="text-red-400">Terms of Service</a> and <a href="#" className="text-red-400">Privacy Policy</a>
+            I agree to the <span className="text-red-400">Terms of Service</span> and <span className="text-red-400">Privacy Policy</span>
           </label>
+          {errors.agree && <p className="text-red-400 text-[10px]">{errors.agree}</p>}
 
           <Button type="submit" className="w-full">Sign Up</Button>
 
           <p className="text-center text-xs text-gray-400">
-            Already have an account? <Link to="/client/login" className="text-red-400 hover:underline">Sign in</Link>
+            Already have an account? <Link to="/" className="text-red-400 hover:underline">Sign in</Link>
           </p>
         </form>
       </div>

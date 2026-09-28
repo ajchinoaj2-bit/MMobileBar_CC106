@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Packages } from '../../constants/Packages';
+import { getPackages } from '../../utils/packages';
 import Payment from './Payment';
 
 export default function BookingConfirmation() {
@@ -8,12 +8,18 @@ export default function BookingConfirmation() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [showPayment, setShowPayment] = useState(false);
+  const [packages, setPackages] = useState([]);
+
+  useEffect(() => {
+    setPackages(getPackages());
+  }, []);
 
   const pkgId = Number(searchParams.get('pkg')) || 1;
-  const selectedPackage = Packages.find((p) => p.id === pkgId) || Packages[0];
+  const selectedPackage = packages.find((p) => p.id === pkgId) || packages[0] || { title: '', price: '0' };
 
   const form = location.state?.form || {};
   const selectedAddOns = location.state?.selectedAddOns || [];
+  const bookingId = location.state?.bookingId;
 
   const booking = {
     package: selectedPackage.title,
@@ -21,7 +27,7 @@ export default function BookingConfirmation() {
     time: form.eventTime || '—',
     guests: form.guests || '—',
     location: form.location || '—',
-    totalDue: Number(selectedPackage.price.replace(/,/g, '')) / 2,
+    totalDue: Number(String(selectedPackage.price).replace(/,/g, '')) / 2,
   };
 
   return (
@@ -99,6 +105,7 @@ export default function BookingConfirmation() {
       {showPayment && (
         <Payment
           amountDue={booking.totalDue}
+          bookingId={bookingId}
           onCancel={() => setShowPayment(false)}
           onDone={() => navigate('/client/dashboard')}
         />

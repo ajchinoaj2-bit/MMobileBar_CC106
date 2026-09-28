@@ -1,14 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const bookings = [
-  { id: 1, event: 'Corporate Mixer', package: 'Platinum Package', date: { month: 'OCT', day: 24, year: 2025 }, status: 'Pending', statusNote: 'Pending Confirmation', created: 'May 20, 2025' },
-  { id: 2, event: 'Wedding Reception', package: 'Custom Cocktail Menu', date: { month: 'NOV', day: 12, year: 2025 }, status: 'Pending', statusNote: 'Pending Review', created: 'May 18, 2025' },
-  { id: 3, event: 'Holiday Party', package: 'Gold Package', date: { month: 'DEC', day: 5, year: 2025 }, status: 'Pending', statusNote: 'Pending Deposit', created: 'May 15, 2025' },
-  { id: 4, event: 'Corporate Mixer', package: 'Platinum Package', date: { month: 'OCT', day: 30, year: 2025 }, status: 'Approved', statusNote: 'Approved', created: 'May 20, 2025' },
-  { id: 5, event: 'Birthday Celebration', package: 'Platinum Package', date: { month: 'OCT', day: 10, year: 2025 }, status: 'Rejected', statusNote: 'Rejected', created: 'May 10, 2025' },
-  { id: 6, event: 'Product Launch', package: 'Platinum Package', date: { month: 'OCT', day: 24, year: 2025 }, status: 'Completed', statusNote: 'Completed', created: 'May 20, 2025' },
-];
+import { getBookings } from '../../utils/bookings';
 
 const statusStyle = {
   Pending: { badge: 'bg-yellow-100 text-yellow-700', dateBg: 'bg-yellow-600' },
@@ -19,11 +11,56 @@ const statusStyle = {
 
 const tabs = ['Pending', 'Approved', 'Rejected', 'Completed'];
 
+function parseDateParts(dateStr) {
+  if (!dateStr) return { month: '—', day: '—', year: '—' };
+  const [year, month, day] = dateStr.split('-');
+  const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  return { month: monthNames[Number(month) - 1] || '—', day: Number(day), year };
+}
+
+function isPastDate(dateStr) {
+  if (!dateStr) return false;
+  const eventDate = new Date(dateStr);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return eventDate < today;
+}
+
 export default function CBookingHistory() {
   const [activeTab, setActiveTab] = useState('Pending');
+  const [bookings, setBookings] = useState([]);
   const navigate = useNavigate();
 
-  const filtered = bookings.filter((b) => b.status === activeTab);
+  useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const all = getBookings();
+    const mine = currentUser ? all.filter((b) => b.client === currentUser.fullname) : all;
+    setBookings(mine);
+  }, []);
+
+  const mapped = bookings.map((b) => {
+    const eventPassed = isPastDate(b.form?.eventDate);
+    const displayStatus =
+      b.status === 'Declined' ? 'Rejected' :
+      b.status === 'Approved' && eventPassed ? 'Completed' :
+      b.status;
+
+    return {
+      id: b.id,
+      event: b.event || 'Untitled Event',
+      package: b.package,
+      date: parseDateParts(b.form?.eventDate),
+      status: displayStatus,
+      statusNote:
+        displayStatus === 'Pending' ? 'Pending Confirmation' :
+        displayStatus === 'Approved' ? 'Approved — Upcoming' :
+        displayStatus === 'Rejected' ? 'Rejected' :
+        displayStatus === 'Completed' ? 'Event Completed' : displayStatus,
+      created: b.submitted,
+    };
+  });
+
+  const filtered = mapped.filter((b) => b.status === activeTab);
 
   return (
     <div>

@@ -2,16 +2,23 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../../components/shared/Button';
 import logo from '../../assets/images/Mlogo.png';
+import { login } from '../../utils/auth';
 
 export default function ClientLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    /*Do to real auth*/
+    const result = login(email, password, 'client');
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
+    setError('');
     navigate('/client/dashboard');
   };
 
@@ -40,7 +47,6 @@ export default function ClientLogin() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-              required
             />
           </div>
 
@@ -52,9 +58,10 @@ export default function ClientLogin() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               className="w-full px-3 py-2 rounded bg-[#0d1f14] border border-gray-600 text-white text-sm outline-none focus:border-green-500"
-              required
             />
           </div>
+
+          {error && <p className="text-red-400 text-xs">{error}</p>}
 
           <div className="flex justify-between items-center text-xs text-gray-400">
             <label className="flex items-center gap-2">
