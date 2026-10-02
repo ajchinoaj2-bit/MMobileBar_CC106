@@ -9,7 +9,6 @@ const pageTitles = {
   '/client/booking-confirmation': { title: 'Booking Confirmation', subtitle: 'Please review your booking details before proceeding to payment.' },
   '/client/booking-history': { title: 'Booking History', subtitle: 'Track the status of your upcoming and past events.' },
   '/client/messages': { title: 'Messages', subtitle: 'Chat with the M Mobile Bar team' },
-  '/client/settings': { title: 'Account Settings', subtitle: 'Update your profile information and password.' },
 };
 
 function getPageInfo(pathname) {

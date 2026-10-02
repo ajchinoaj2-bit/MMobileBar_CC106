@@ -20,11 +20,13 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-60 h-screen bg-[#0d1f14] text-white flex flex-col justify-between fixed left-0 top-0">
+    <aside className="w-60 h-screen bg-bottle-900 text-ivory-50 flex flex-col justify-between fixed left-0 top-0">
       <div>
-        <div className="flex flex-col items-center py-6">
+        <div className="flex flex-col items-center py-6 border-b border-forest-700/60">
           <img src={logo} alt="M Mobile Bar" className="w-14 h-14" />
-          <span className="text-green-400 font-bold mt-2">M Mobile Bar</span>
+          <span className="font-display text-brass-500 font-semibold text-lg mt-2 tracking-wide">
+            M Mobile Bar
+          </span>
         </div>
 
         <nav className="mt-4">
@@ -33,8 +35,10 @@ export default function Sidebar() {
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-6 py-3 text-sm transition-colors ${
-                  isActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-[#14301d]'
+                `flex items-center gap-3 px-6 py-3 text-sm transition-colors border-l-4 ${
+                  isActive
+                    ? 'bg-forest-700/60 border-brass-500 text-brass-400 font-medium'
+                    : 'border-transparent text-ivory-100/70 hover:bg-forest-700/30 hover:text-ivory-50'
                 }`
               }
             >
@@ -47,7 +51,7 @@ export default function Sidebar() {
 
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 px-6 py-4 text-sm text-gray-300 hover:bg-[#14301d]"
+        className="flex items-center gap-3 px-6 py-4 text-sm text-ivory-100/70 hover:bg-forest-700/30 hover:text-ivory-50 transition-colors"
       >
         <FaSignOutAlt /> Logout
       </button>

@@ -18,7 +18,7 @@ import BookingConfirmation from './pages/client/BookingConfirmation';
 import CBookingHistory from './pages/client/CBookingHistory';
 import CBookingDetails from './pages/client/CBookingDetails';
 import ClientMessages from './pages/client/Messages';
-import AccountSettings from './pages/client/AccountSettings';
+
 import ProtectedRoute from './components/shared/ProtectedRoute';
 
 export default function App() {
@@ -62,7 +62,7 @@ export default function App() {
           <Route path="booking-history" element={<CBookingHistory />} />
           <Route path="booking-history/:id" element={<CBookingDetails />} />
           <Route path="messages" element={<ClientMessages />} />
-          <Route path="settings" element={<AccountSettings />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

@@ -9,11 +9,10 @@ export default function Calendar() {
 
   useEffect(() => {
     const bookings = getBookings();
-    // map real bookings into the shape this page expects
     const mapped = bookings
-      .filter((b) => b.form?.eventDate) // only ones with a real date
+      .filter((b) => b.form?.eventDate)
       .map((b) => ({
-        date: b.form.eventDate, // already 'YYYY-MM-DD' from <input type="date">
+        date: b.form.eventDate,
         title: b.event || 'Untitled Event',
         time: b.form.eventTime || '',
         status: b.status === 'Approved' ? 'Approved' : 'Pending',
@@ -26,7 +25,7 @@ export default function Calendar() {
   const month = currentDate.getMonth();
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstWeekday = new Date(year, month, 1).getDay(); // 0 = Sunday
+  const firstWeekday = new Date(year, month, 1).getDay();
 
   const monthName = currentDate.toLocaleString('default', { month: 'long' });
 
@@ -46,7 +45,6 @@ export default function Calendar() {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const calendarCells = [...blanks, ...days];
 
-  // Month Overview should reflect only events in the currently viewed month
   const eventsThisMonth = events.filter((e) => e.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`));
   const totalBookings = eventsThisMonth.length;
   const approved = eventsThisMonth.filter((e) => e.status === 'Approved').length;
@@ -58,12 +56,16 @@ export default function Calendar() {
         {/* Calendar grid */}
         <div className="col-span-2 bg-white rounded-lg shadow p-4">
           <div className="flex justify-between items-center mb-4">
-            <button onClick={goToPrevMonth}><FaChevronLeft /></button>
-            <h2 className="font-semibold">{monthName} {year}</h2>
-            <button onClick={goToNextMonth}><FaChevronRight /></button>
+            <button onClick={goToPrevMonth} className="text-charcoal-500 hover:text-forest-700">
+              <FaChevronLeft />
+            </button>
+            <h2 className="font-display font-semibold text-bottle-900">{monthName} {year}</h2>
+            <button onClick={goToNextMonth} className="text-charcoal-500 hover:text-forest-700">
+              <FaChevronRight />
+            </button>
           </div>
 
-          <div className="grid grid-cols-7 text-center text-xs text-gray-400 mb-2">
+          <div className="grid grid-cols-7 text-center text-xs text-charcoal-500 mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
               <div key={d}>{d}</div>
             ))}
@@ -79,8 +81,8 @@ export default function Calendar() {
                 <button
                   key={idx}
                   onClick={() => setSelectedDay(day)}
-                  className={`h-16 rounded flex flex-col items-center justify-start pt-1 ${
-                    isSelected ? 'bg-green-600 text-white' : 'hover:bg-gray-50'
+                  className={`h-16 rounded flex flex-col items-center justify-start pt-1 transition-colors ${
+                    isSelected ? 'bg-forest-700 text-ivory-50' : 'text-charcoal-800 hover:bg-ivory-50'
                   }`}
                 >
                   <span>{day}</span>
@@ -89,8 +91,8 @@ export default function Calendar() {
                       <span
                         key={i}
                         className={`w-1.5 h-1.5 rounded-full ${
-                          e.status === 'Approved' ? 'bg-green-500' : 'bg-yellow-500'
-                        } ${isSelected ? 'bg-white' : ''}`}
+                          e.status === 'Approved' ? 'bg-forest-700' : 'bg-brass-500'
+                        } ${isSelected ? 'bg-ivory-50' : ''}`}
                       />
                     ))}
                   </div>
@@ -98,44 +100,56 @@ export default function Calendar() {
               );
             })}
           </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-5 mt-4 pt-3 border-t border-brass-100 text-xs text-charcoal-500">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-brass-500 inline-block" />
+              Pending
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-forest-700 inline-block" />
+              Booked / Approved
+            </div>
+          </div>
         </div>
 
         {/* Side panel */}
         <div className="space-y-4">
           <div className="bg-white rounded-lg shadow p-4">
-            <h3 className="font-semibold mb-3">Events for {monthName} {selectedDay}</h3>
+            <h3 className="font-display font-semibold text-bottle-900 mb-3">Events for {monthName} {selectedDay}</h3>
             {selectedEvents.length === 0 && (
-              <p className="text-gray-400 text-sm">No events this day.</p>
+              <p className="text-charcoal-500 text-sm">No events this day.</p>
             )}
             {selectedEvents.map((e, i) => (
-              <div key={i} className="border-b last:border-0 pb-3 mb-3 text-sm">
+              <div key={i} className="border-b border-gray-100 last:border-0 pb-3 mb-3 text-sm">
                 <span
-                  className={`text-xs px-2 py-0.5 rounded ${
-                    e.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                  className={`text-xs px-2 py-0.5 rounded font-medium ${
+                    e.status === 'Approved' ? 'bg-forest-700/10 text-forest-700' : 'bg-brass-100 text-brass-600'
                   }`}
                 >
                   {e.status}
                 </span>
-                <p className="font-medium mt-1">{e.title}</p>
-                <p className="text-gray-400 text-xs">{e.time}</p>
-                <p className="text-gray-400 text-xs">{e.location}</p>
+                <p className="font-medium mt-1 text-charcoal-800">{e.title}</p>
+                <p className="text-charcoal-500 text-xs">{e.time}</p>
+                <p className="text-charcoal-500 text-xs">{e.location}</p>
               </div>
             ))}
           </div>
 
           <div className="bg-white rounded-lg shadow p-4 text-sm">
-            <h3 className="font-semibold mb-2">Month Overview</h3>
+            <h3 className="font-display font-semibold text-bottle-900 mb-2">Month Overview</h3>
             <div className="flex justify-between py-1">
-              <span className="text-gray-500">Total Bookings</span>
-              <span>{totalBookings}</span>
+              <span className="text-charcoal-500">Total Bookings</span>
+              <span className="text-charcoal-800">{totalBookings}</span>
             </div>
             <div className="flex justify-between py-1">
-              <span className="text-gray-500">Approved</span>
-              <span className="text-green-600">{approved}</span>
+              <span className="text-charcoal-500">Approved</span>
+              <span className="text-forest-700 font-medium">{approved}</span>
             </div>
             <div className="flex justify-between py-1">
-              <span className="text-gray-500">Pending Action</span>
-              <span className="text-yellow-600">{pending}</span>
+              <span className="text-charcoal-500">Pending Action</span>
+              <span className="text-brass-600 font-medium">{pending}</span>
             </div>
           </div>
         </div>

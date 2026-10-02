@@ -1,3 +1,5 @@
+import { isNotificationsEnabled } from './settings';
+
 const KEY = 'mmb_notifications';
 const read = () => JSON.parse(localStorage.getItem(KEY) || '[]');
 const write = (list) => {
@@ -6,6 +8,7 @@ const write = (list) => {
 };
 
 export function addNotification({ to, title, body, link }) {
+  if (!isNotificationsEnabled(to)) return;
   write([{ id: Date.now() + Math.random(), to, title, body, link,
            time: new Date().toISOString(), read: false }, ...read()]);
 }

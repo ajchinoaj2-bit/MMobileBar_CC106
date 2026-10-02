@@ -1,6 +1,37 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  /* Core palette — bottle green, brass gold, warm ivory */
+  --color-bottle-950: #081712;
+  --color-bottle-900: #0b1f14;
+  --color-bottle-800: #13291c;
+  --color-forest-700: #1c3b2a;
+  --color-forest-600: #2a4d38;
+
+  --color-brass-600: #a8873d;
+  --color-brass-500: #c9a961;
+  --color-brass-400: #d9c08a;
+  --color-brass-100: #f3ebd6;
+
+  --color-ivory-50: #f5f1e8;
+  --color-ivory-100: #efe9db;
+
+  --color-charcoal-800: #2d2d2d;
+  --color-charcoal-500: #6b6b63;
+
+  /* Fonts */
+  --font-display: 'Fraunces', serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
 body {
-    font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--color-ivory-50);
+  color: var(--color-charcoal-800);
+}
+
+.font-display {
+  font-family: var(--font-display);
 }

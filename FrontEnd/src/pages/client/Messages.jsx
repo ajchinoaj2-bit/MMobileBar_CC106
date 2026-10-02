@@ -31,14 +31,14 @@ export default function ClientMessages() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-5.75rem)] -m-6 rounded-lg overflow-hidden border">
+    <div className="flex h-[calc(100vh-5.75rem)] -m-6 rounded-lg overflow-hidden border border-brass-100">
       {/* Conversation list */}
-      <div className="w-72 border-r bg-white flex flex-col">
+      <div className="w-72 border-r border-brass-100 bg-white flex flex-col">
         <div className="p-4">
           <input
             type="text"
             placeholder="Search..."
-            className="w-full border rounded px-3 py-2 text-sm"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-brass-500"
           />
         </div>
 
@@ -47,16 +47,16 @@ export default function ClientMessages() {
             <button
               key={c.id}
               onClick={() => setActiveId(c.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left border-l-4 ${
-                c.id === activeId ? 'bg-green-50 border-green-600' : 'border-transparent hover:bg-gray-50'
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left border-l-4 transition-colors ${
+                c.id === activeId ? 'bg-brass-100/60 border-brass-500' : 'border-transparent hover:bg-ivory-50'
               }`}
             >
               <FaUserCircle className="text-2xl text-gray-400" />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between">
-                  <span className="font-semibold text-sm">{c.name}</span>
+                  <span className="font-semibold text-sm text-charcoal-800">{c.name}</span>
                 </div>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-charcoal-500 truncate">
                   {c.isSystem ? c.preview : 'Chat with the M Mobile Bar team'}
                 </p>
               </div>
@@ -64,19 +64,19 @@ export default function ClientMessages() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 border-t shrink-0">
-          <span className="font-semibold text-sm">Conversations</span>
-          <FaSlidersH className="text-gray-400" />
+        <div className="flex items-center justify-between px-4 py-3 border-t border-brass-100 shrink-0">
+          <span className="font-semibold text-sm text-charcoal-800">Conversations</span>
+          <FaSlidersH className="text-charcoal-500" />
         </div>
       </div>
 
       {/* Chat window */}
-      <div className="flex-1 flex flex-col bg-gray-50">
-        <div className="bg-green-700 text-white px-6 py-3 flex items-center gap-3 shrink-0">
-          <FaUserCircle className="text-2xl" />
+      <div className="flex-1 flex flex-col bg-ivory-50">
+        <div className="bg-gradient-to-r from-bottle-900 to-forest-700 text-ivory-50 px-6 py-3 flex items-center gap-3 shrink-0">
+          <FaUserCircle className="text-2xl text-ivory-100/70" />
           <div>
             <h2 className="font-semibold">{active.name}</h2>
-            <p className="text-xs text-green-100">
+            <p className="text-xs text-ivory-100/70">
               {active.isSystem ? 'Automated system notifications' : 'You are now directly talking to the Owner'}
             </p>
           </div>
@@ -84,30 +84,30 @@ export default function ClientMessages() {
 
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="flex justify-center mb-4">
-            <span className="bg-gray-200 text-xs px-3 py-1 rounded-full text-gray-500">Today</span>
+            <span className="bg-white text-xs px-3 py-1 rounded-full text-charcoal-500 border border-brass-100">Today</span>
           </div>
 
           {active.isSystem ? (
             <div className="flex justify-start">
               <div className="max-w-md bg-white shadow rounded-lg px-4 py-3">
-                <p className="text-sm">{active.preview}</p>
-                <p className="text-xs text-gray-400 mt-2">10:35 AM</p>
+                <p className="text-sm text-charcoal-800">{active.preview}</p>
+                <p className="text-xs text-charcoal-500 mt-2">10:35 AM</p>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               {thread.length === 0 && (
-                <p className="text-center text-gray-400 text-sm">No messages yet. Say hello!</p>
+                <p className="text-center text-charcoal-500 text-sm">No messages yet. Say hello!</p>
               )}
               {thread.map((m, i) => (
                 <div key={i} className={`flex ${m.from === 'client' ? 'justify-end' : 'justify-start'}`}>
                   <div
                     className={`max-w-md rounded-lg px-4 py-3 ${
-                      m.from === 'client' ? 'bg-green-700 text-white' : 'bg-white shadow'
+                      m.from === 'client' ? 'bg-brass-500 text-bottle-900' : 'bg-white shadow text-charcoal-800'
                     }`}
                   >
                     <p className="text-sm">{m.text}</p>
-                    <p className={`text-xs mt-2 ${m.from === 'client' ? 'text-green-100 text-right' : 'text-gray-400'}`}>
+                    <p className={`text-xs mt-2 ${m.from === 'client' ? 'text-bottle-900/60 text-right' : 'text-charcoal-500'}`}>
                       {m.time}
                     </p>
                   </div>
@@ -117,8 +117,8 @@ export default function ClientMessages() {
           )}
         </div>
 
-        <div className="p-4 bg-white border-t flex items-center gap-3 shrink-0">
-          <button className="text-gray-400 hover:text-gray-600">
+        <div className="p-4 bg-white border-t border-brass-100 flex items-center gap-3 shrink-0">
+          <button className="text-charcoal-500 hover:text-forest-700">
             <FaPaperclip />
           </button>
           <input
@@ -128,12 +128,12 @@ export default function ClientMessages() {
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             disabled={active.isSystem}
-            className="flex-1 border rounded px-4 py-2 text-sm disabled:bg-gray-100"
+            className="flex-1 border border-gray-300 rounded px-4 py-2 text-sm outline-none focus:border-brass-500 disabled:bg-gray-100"
           />
           <button
             onClick={handleSend}
             disabled={active.isSystem}
-            className="bg-green-700 text-white px-5 py-2 rounded text-sm font-semibold hover:bg-green-800 disabled:opacity-50"
+            className="bg-brass-500 text-bottle-900 font-medium px-5 py-2 rounded text-sm hover:bg-brass-600 transition-colors disabled:opacity-50"
           >
             SEND
           </button>
