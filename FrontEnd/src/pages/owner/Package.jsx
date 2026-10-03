@@ -80,11 +80,9 @@ export default function Package() {
   };
 
   return (
-    <div className="h-[calc(100vh-9rem)] flex flex-col">
+    <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 shrink-0">
-        <div></div>
-
+      <div className="flex items-center justify-end mb-6">
         <button
           onClick={openAddModal}
           className="flex items-center gap-2 bg-brass-500 text-bottle-900 font-medium text-sm px-4 py-2 rounded-md hover:bg-brass-600 transition-colors"
@@ -95,10 +93,10 @@ export default function Package() {
       </div>
 
       {/* Package Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-y-auto pb-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {packages.map((pkg) => (
-          <div key={pkg.id} className="bg-white rounded-lg shadow flex flex-col h-full overflow-hidden">
-            <div className="bg-gradient-to-br from-bottle-900 to-forest-700 px-5 py-4 flex items-center justify-between">
+          <div key={pkg.id} className="bg-white rounded-lg shadow flex flex-col overflow-hidden">
+            <div className="bg-gradient-to-br from-bottle-900 to-forest-700 px-5 py-3 flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold text-ivory-50">{pkg.title}</h2>
               <div className="flex items-center gap-3">
                 <button
@@ -116,43 +114,43 @@ export default function Package() {
               </div>
             </div>
 
-            <div className="p-5 flex flex-col flex-1">
-              <div className="mb-5">
-                <h3 className="text-xs font-bold text-forest-700 mb-2 tracking-wide">Short Description</h3>
-                <div className="bg-ivory-50 rounded-md p-3 text-xs text-charcoal-800 space-y-1">
+            <div className="p-4 flex flex-col flex-1">
+              <div className="mb-3">
+                <h3 className="text-xs font-bold text-forest-700 mb-1 tracking-wide">Short Description</h3>
+                <div className="bg-ivory-50 rounded-md p-2.5 text-xs text-charcoal-800 space-y-0.5">
                   {(pkg.description || []).map((item, i) => <p key={i}>• {item}</p>)}
                 </div>
               </div>
 
-              <div className="mb-5">
-                <h3 className="text-xs font-bold text-forest-700 mb-2 tracking-wide">Price</h3>
-                <div className="bg-brass-100 border border-brass-400/50 rounded-md px-3 py-2 text-sm font-semibold text-bottle-900">
+              <div className="mb-3">
+                <h3 className="text-xs font-bold text-forest-700 mb-1 tracking-wide">Price</h3>
+                <div className="bg-brass-100 border border-brass-400/50 rounded-md px-3 py-1.5 text-sm font-semibold text-bottle-900">
                   ₱{pkg.price}
                 </div>
               </div>
 
-              <div className="mb-5">
-                <h3 className="text-xs font-bold text-forest-700 mb-2 tracking-wide">All Package Inclusion</h3>
-                <div className="bg-ivory-50 rounded-md p-3 text-xs text-charcoal-800 space-y-1">
+              <div className="mb-3">
+                <h3 className="text-xs font-bold text-forest-700 mb-1 tracking-wide">All Package Inclusion</h3>
+                <div className="bg-ivory-50 rounded-md p-2.5 text-xs text-charcoal-800 space-y-0.5">
                   {(pkg.inclusions || []).map((item, i) => <p key={i}>• {item}</p>)}
                 </div>
               </div>
 
-              <div className="mb-5">
-                <h3 className="text-xs font-bold text-forest-700 mb-2 tracking-wide">Add Ons</h3>
-                <div className="bg-ivory-50 rounded-md p-3 text-xs text-charcoal-800 space-y-1">
+              <div className="mb-3">
+                <h3 className="text-xs font-bold text-forest-700 mb-1 tracking-wide">Add Ons</h3>
+                <div className="bg-ivory-50 rounded-md p-2.5 text-xs text-charcoal-800 space-y-0.5">
                   {(pkg.addOns || []).map((item, i) => <p key={i}>• {item}</p>)}
                 </div>
               </div>
 
-              <div className="bg-ivory-50 rounded-md flex-1 flex items-center justify-center overflow-hidden">
-                <img src={pkg.image || logo} alt={pkg.title} className="h-20 object-contain" />
+              <div className="bg-ivory-50 rounded-md flex items-center justify-center overflow-hidden py-2">
+                <img src={pkg.image || logo} alt={pkg.title} className="h-14 object-contain" />
               </div>
 
               {pkg.notes && (
-                <div className="mt-4 shrink-0">
+                <div className="mt-2">
                   <h3 className="text-xs font-bold text-forest-700">NOTE:</h3>
-                  <p className="text-xs text-charcoal-500 mt-1">{pkg.notes}</p>
+                  <p className="text-xs text-charcoal-500 mt-0.5">{pkg.notes}</p>
                 </div>
               )}
             </div>

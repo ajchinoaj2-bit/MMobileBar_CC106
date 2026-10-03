@@ -35,9 +35,7 @@ export default function Payments() {
   ];
 
   return (
-    <div className="h-full w-full overflow-hidden bg-ivory-50 px-8 py-7">
-      <div className="mb-8"></div>
-
+    <div className="min-h-[calc(100vh-9rem)]">
       {/* PAYMENT SUMMARY */}
       <div className="grid grid-cols-4 gap-6">
         <div className="h-[120px] rounded-md border border-brass-200 bg-white px-5 py-4">
