@@ -28,6 +28,14 @@ export function addBooking(booking) {
     body: `${newBooking.client} requested "${newBooking.package}"`,
     link: `/owner/bookings/${newBooking.id}`,
   });
+
+  addNotification({
+    to: newBooking.client,
+    title: 'Booking Confirmation Sent',
+    body: `Your request for "${newBooking.package}" has been submitted and is awaiting approval.`,
+    link: `/client/booking-history/${newBooking.id}`,
+  });
+
   sendMessage(newBooking.client, 'client',
     `Hi! I just submitted a booking request for ${newBooking.package} on ${newBooking.date}.`,
     { silent: true });

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { getBookings } from '../../utils/bookings';
 
 export default function Calendar() {
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [events, setEvents] = useState([]);
@@ -12,6 +14,7 @@ export default function Calendar() {
     const mapped = bookings
       .filter((b) => b.form?.eventDate)
       .map((b) => ({
+        id: b.id,
         date: b.form.eventDate,
         title: b.event || 'Untitled Event',
         time: b.form.eventTime || '',
@@ -121,8 +124,8 @@ export default function Calendar() {
             {selectedEvents.length === 0 && (
               <p className="text-charcoal-500 text-sm">No events this day.</p>
             )}
-            {selectedEvents.map((e, i) => (
-              <div key={i} className="border-b border-gray-100 last:border-0 pb-3 mb-3 text-sm">
+            {selectedEvents.map((e) => (
+              <div key={e.id} className="border-b border-gray-100 last:border-0 pb-3 mb-3 text-sm">
                 <span
                   className={`text-xs px-2 py-0.5 rounded font-medium ${
                     e.status === 'Approved' ? 'bg-forest-700/10 text-forest-700' : 'bg-brass-100 text-brass-600'
@@ -132,7 +135,13 @@ export default function Calendar() {
                 </span>
                 <p className="font-medium mt-1 text-charcoal-800">{e.title}</p>
                 <p className="text-charcoal-500 text-xs">{e.time}</p>
-                <p className="text-charcoal-500 text-xs">{e.location}</p>
+                <p className="text-charcoal-500 text-xs mb-2">{e.location}</p>
+                <button
+                  onClick={() => navigate(`/owner/bookings/${e.id}`)}
+                  className="text-forest-700 hover:text-brass-600 text-xs font-medium underline"
+                >
+                  View Details
+                </button>
               </div>
             ))}
           </div>

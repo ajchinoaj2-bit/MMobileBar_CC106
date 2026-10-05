@@ -8,7 +8,7 @@ const navItems = [
   { name: 'Bookings', path: '/owner/bookings', icon: <FaCalendarAlt /> },
   { name: 'Package', path: '/owner/package', icon: <FaBoxOpen /> },
   { name: 'Clients', path: '/owner/clients', icon: <FaUsers /> },
-  { name: 'Payment management', path: '/owner/payments', icon: <FaMoneyBillWave /> },
+  { name: 'Payment Management', path: '/owner/payments', icon: <FaMoneyBillWave /> },
 ];
 
 export default function Sidebar() {

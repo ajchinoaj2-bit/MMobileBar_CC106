@@ -1,26 +1,39 @@
 import { useEffect, useState } from 'react';
 import { FaUserCircle, FaPaperclip, FaSlidersH } from 'react-icons/fa';
 import { getThread, sendMessage } from '../../utils/messages';
+import { getNotifications, timeAgo } from '../../utils/notifications';
 
 export default function ClientMessages() {
   const [activeId, setActiveId] = useState(1);
   const [thread, setThread] = useState([]);
   const [draft, setDraft] = useState('');
+  const [systemNotifications, setSystemNotifications] = useState([]);
 
   const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const clientName = currentUser?.fullname || 'Guest Client';
 
   const conversations = [
     { id: 1, name: 'Admin', isSystem: false },
-    { id: 2, name: 'System', isSystem: true, preview: 'Your booking confirmation has been sent.' },
+    { id: 2, name: 'System', isSystem: true },
   ];
 
   const active = conversations.find((c) => c.id === activeId);
 
   useEffect(() => {
-    if (activeId === 1) {
-      setThread(getThread(clientName));
-    }
+    const refresh = () => {
+      if (activeId === 1) {
+        setThread(getThread(clientName));
+      } else {
+        setSystemNotifications(getNotifications(clientName));
+      }
+    };
+    refresh();
+    window.addEventListener('mmb_notif_change', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('mmb_notif_change', refresh);
+      window.removeEventListener('storage', refresh);
+    };
   }, [activeId]);
 
   const handleSend = () => {
@@ -29,6 +42,8 @@ export default function ClientMessages() {
     setThread(getThread(clientName));
     setDraft('');
   };
+
+  const latestSystemPreview = systemNotifications[0]?.body || 'No system notifications yet.';
 
   return (
     <div className="flex h-[calc(100vh-5.75rem)] -m-6 rounded-lg overflow-hidden border border-brass-100">
@@ -57,7 +72,7 @@ export default function ClientMessages() {
                   <span className="font-semibold text-sm text-charcoal-800">{c.name}</span>
                 </div>
                 <p className="text-xs text-charcoal-500 truncate">
-                  {c.isSystem ? c.preview : 'Chat with the M Mobile Bar team'}
+                  {c.isSystem ? latestSystemPreview : 'Chat with the M Mobile Bar team'}
                 </p>
               </div>
             </button>
@@ -88,11 +103,19 @@ export default function ClientMessages() {
           </div>
 
           {active.isSystem ? (
-            <div className="flex justify-start">
-              <div className="max-w-md bg-white shadow rounded-lg px-4 py-3">
-                <p className="text-sm text-charcoal-800">{active.preview}</p>
-                <p className="text-xs text-charcoal-500 mt-2">10:35 AM</p>
-              </div>
+            <div className="space-y-4">
+              {systemNotifications.length === 0 && (
+                <p className="text-center text-charcoal-500 text-sm">No system notifications yet.</p>
+              )}
+              {systemNotifications.map((n) => (
+                <div key={n.id} className="flex justify-start">
+                  <div className="max-w-md bg-white shadow rounded-lg px-4 py-3">
+                    <p className="text-sm font-medium text-charcoal-800">{n.title}</p>
+                    <p className="text-sm text-charcoal-800">{n.body}</p>
+                    <p className="text-xs text-charcoal-500 mt-2">{timeAgo(n.time)}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="space-y-4">
