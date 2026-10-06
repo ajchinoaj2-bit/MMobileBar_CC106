@@ -61,7 +61,7 @@ export default function BookingDetails() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div>
           <h2 className="font-display text-xl font-bold text-forest-700">
             Booking #BK-{String(booking.id).padStart(4, '0')}
@@ -78,12 +78,12 @@ export default function BookingDetails() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: main info */}
-        <div className="col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-lg shadow p-5">
             <h2 className="font-display font-semibold text-bottle-900 mb-3">Client Information</h2>
-            <div className="grid grid-cols-2 text-sm gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 text-sm gap-2">
               <div>
                 <p className="text-charcoal-500 text-xs">Name</p>
                 <p className="text-charcoal-800">{booking.client}</p>
@@ -103,7 +103,7 @@ export default function BookingDetails() {
 
           <div className="bg-white rounded-lg shadow p-5">
             <h2 className="font-display font-semibold text-bottle-900 mb-3">Event Information</h2>
-            <div className="grid grid-cols-2 text-sm gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 text-sm gap-2">
               <div>
                 <p className="text-charcoal-500 text-xs">Event Name & Date</p>
                 <p className="text-charcoal-800">{booking.event}</p>
@@ -122,7 +122,7 @@ export default function BookingDetails() {
 
           <div className="bg-white rounded-lg shadow p-5">
             <h2 className="font-display font-semibold text-bottle-900 mb-3">Selected Package & Add-ons</h2>
-            <div className="flex justify-between items-start bg-ivory-50 rounded p-3">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 bg-ivory-50 rounded p-3">
               <div>
                 <p className="font-medium text-sm text-charcoal-800">{booking.package}</p>
                 {booking.addOns?.length > 0 && (

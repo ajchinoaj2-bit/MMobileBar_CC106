@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { FaCog, FaUserCircle } from 'react-icons/fa';
+import { FaCog, FaUserCircle, FaBars } from 'react-icons/fa';
 import { getCurrentUser } from '../../utils/auth';
 import { isNotificationsEnabled } from '../../utils/settings';
 import NotificationBell from './NotificationBell';
 import ProfileModal from './ProfileModal';
 import SettingsModal from './SettingsModal';
 
-export default function TopBar({ title, subtitle }) {
+export default function TopBar({ title, subtitle, onMenuClick }) {
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [, setVersion] = useState(0);
@@ -17,17 +17,25 @@ export default function TopBar({ title, subtitle }) {
   const showBell = recipient && isNotificationsEnabled(recipient);
 
   return (
-    <div className="h-25 bg-ivory-50 border-b border-brass-100 flex items-center justify-between px-6">
-      <div>
-        {title && (
-          <h1 className="font-display text-4xl font-semibold text-bottle-900 leading-tight">
-            {title}
-          </h1>
-        )}
-        {subtitle && <p className="text-sm text-charcoal-500">{subtitle}</p>}
+    <div className="h-auto md:h-25 bg-ivory-50 border-b border-brass-100 flex items-center justify-between px-4 md:px-6 py-3 md:py-0">
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          onClick={onMenuClick}
+          className="md:hidden text-charcoal-800 hover:text-forest-700 text-xl shrink-0"
+        >
+          <FaBars />
+        </button>
+        <div className="min-w-0">
+          {title && (
+            <h1 className="font-display text-xl md:text-4xl font-semibold text-bottle-900 leading-tight truncate">
+              {title}
+            </h1>
+          )}
+          {subtitle && <p className="hidden sm:block text-sm text-charcoal-500 truncate">{subtitle}</p>}
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4 shrink-0">
         {showBell && <NotificationBell recipient={recipient} />}
 
         <button

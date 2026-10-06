@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/shared/Sidebar';
 import TopBar from '../components/shared/TopBar';
@@ -22,13 +23,14 @@ function getPageInfo(pathname) {
 export default function OwnerLayout() {
   const location = useLocation();
   const current = getPageInfo(location.pathname);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex">
-      <Sidebar />
-      <div className="ml-60 flex-1 min-h-screen bg-gray-50">
-        <TopBar title={current.title} subtitle={current.subtitle} />
-        <main className="px-6 pb-6 pt-4">
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 min-h-screen bg-ivory-50 md:ml-60">
+        <TopBar title={current.title} subtitle={current.subtitle} onMenuClick={() => setSidebarOpen(true)} />
+        <main className="px-4 md:px-6 pb-6 pt-4">
           <Outlet />
         </main>
       </div>

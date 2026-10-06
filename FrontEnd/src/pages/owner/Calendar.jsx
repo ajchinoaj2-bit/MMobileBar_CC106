@@ -55,26 +55,26 @@ export default function Calendar() {
 
   return (
     <div>
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar grid */}
-        <div className="col-span-2 bg-white rounded-lg shadow p-4">
+        <div className="lg:col-span-2 bg-white rounded-lg shadow p-3 md:p-4">
           <div className="flex justify-between items-center mb-4">
             <button onClick={goToPrevMonth} className="text-charcoal-500 hover:text-forest-700">
               <FaChevronLeft />
             </button>
-            <h2 className="font-display font-semibold text-bottle-900">{monthName} {year}</h2>
+            <h2 className="font-display font-semibold text-bottle-900 text-sm md:text-base">{monthName} {year}</h2>
             <button onClick={goToNextMonth} className="text-charcoal-500 hover:text-forest-700">
               <FaChevronRight />
             </button>
           </div>
 
-          <div className="grid grid-cols-7 text-center text-xs text-charcoal-500 mb-2">
+          <div className="grid grid-cols-7 text-center text-[10px] md:text-xs text-charcoal-500 mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
               <div key={d}>{d}</div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-sm">
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1 text-center text-xs md:text-sm">
             {calendarCells.map((day, idx) => {
               if (!day) return <div key={idx} />;
               const dayEvents = eventsForDay(day);
@@ -84,7 +84,7 @@ export default function Calendar() {
                 <button
                   key={idx}
                   onClick={() => setSelectedDay(day)}
-                  className={`h-16 rounded flex flex-col items-center justify-start pt-1 transition-colors ${
+                  className={`h-12 md:h-16 rounded flex flex-col items-center justify-start pt-1 transition-colors ${
                     isSelected ? 'bg-forest-700 text-ivory-50' : 'text-charcoal-800 hover:bg-ivory-50'
                   }`}
                 >

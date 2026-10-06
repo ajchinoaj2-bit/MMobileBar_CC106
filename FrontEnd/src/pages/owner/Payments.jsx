@@ -37,50 +37,50 @@ export default function Payments() {
   return (
     <div className="min-h-[calc(100vh-9rem)]">
       {/* PAYMENT SUMMARY */}
-      <div className="grid grid-cols-4 gap-6">
-        <div className="h-[120px] rounded-md border border-brass-200 bg-white px-5 py-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="min-h-[110px] rounded-md border border-brass-200 bg-white px-5 py-4">
           <div className="flex items-center gap-2 text-sm text-charcoal-800">
             <FaWallet className="text-forest-700" />
             <span>Total Payments</span>
           </div>
-          <p className="mt-2 text-[24px] font-display font-bold text-bottle-900">₱{total.toLocaleString()}.00</p>
+          <p className="mt-2 text-[22px] md:text-[24px] font-display font-bold text-bottle-900">₱{total.toLocaleString()}.00</p>
           <p className="text-sm text-charcoal-500">All times payment received</p>
         </div>
 
-        <div className="h-[120px] rounded-md border border-brass-200 bg-white px-5 py-4">
+        <div className="min-h-[110px] rounded-md border border-brass-200 bg-white px-5 py-4">
           <div className="flex items-center gap-2 text-sm text-charcoal-800">
             <FaCheckCircle className="text-forest-700" />
             <span>Completed Payments</span>
           </div>
-          <p className="mt-2 text-[24px] font-display font-bold text-bottle-900">₱{completed.toLocaleString()}.00</p>
+          <p className="mt-2 text-[22px] md:text-[24px] font-display font-bold text-bottle-900">₱{completed.toLocaleString()}.00</p>
           <p className="text-sm text-charcoal-500">Successfully processed</p>
         </div>
 
-        <div className="h-[120px] rounded-md border border-brass-200 bg-white px-5 py-4">
+        <div className="min-h-[110px] rounded-md border border-brass-200 bg-white px-5 py-4">
           <div className="flex items-center gap-2 text-sm text-charcoal-800">
             <FaClock className="text-brass-600" />
             <span>Pending Payments</span>
           </div>
-          <p className="mt-2 text-[24px] font-display font-bold text-bottle-900">₱{pending.toLocaleString()}.00</p>
+          <p className="mt-2 text-[22px] md:text-[24px] font-display font-bold text-bottle-900">₱{pending.toLocaleString()}.00</p>
           <p className="text-sm text-charcoal-500">Awaiting verification</p>
         </div>
 
-        <div className="h-[120px] rounded-md border border-brass-200 bg-white px-5 py-4">
+        <div className="min-h-[110px] rounded-md border border-brass-200 bg-white px-5 py-4">
           <div className="flex items-center gap-2 text-sm text-charcoal-800">
             <FaUndo className="text-red-500" />
             <span>Refunded Payments</span>
           </div>
-          <p className="mt-2 text-[24px] font-display font-bold text-bottle-900">₱{refunded.toLocaleString()}.00</p>
+          <p className="mt-2 text-[22px] md:text-[24px] font-display font-bold text-bottle-900">₱{refunded.toLocaleString()}.00</p>
           <p className="text-sm text-charcoal-500">Total refunded</p>
         </div>
       </div>
 
       {/* PAYMENT METHODS HEADER */}
-      <div className="mt-8 flex items-center justify-between">
-        <h2 className="font-display text-[22px] font-bold text-bottle-900">Payment Methods</h2>
+      <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h2 className="font-display text-[20px] md:text-[22px] font-bold text-bottle-900">Payment Methods</h2>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 rounded-md bg-brass-500 px-4 py-2 text-sm font-medium text-bottle-900 hover:bg-brass-600 transition-colors"
+          className="flex items-center justify-center gap-2 rounded-md bg-brass-500 px-4 py-2 text-sm font-medium text-bottle-900 hover:bg-brass-600 transition-colors"
         >
           <FaPlus />
           Add Payment Methods
@@ -88,9 +88,9 @@ export default function Payments() {
       </div>
 
       {/* PAYMENT METHOD CARDS */}
-      <div className="mt-5 grid grid-cols-2 gap-8">
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
         {paymentMethods.map((method) => (
-          <div key={method.name} className="h-[110px] w-full border border-brass-200 bg-white px-4 py-3 shadow-sm rounded-md">
+          <div key={method.name} className="min-h-[110px] w-full border border-brass-200 bg-white px-4 py-3 shadow-sm rounded-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-md bg-ivory-100 text-lg font-bold text-bottle-900">
@@ -104,9 +104,9 @@ export default function Payments() {
             <div className="mt-5 flex items-end justify-between">
               <div>
                 <p className="text-xs text-charcoal-500">{method.accountLabel}</p>
-                <p className="mt-1 text-sm text-charcoal-800">{method.account}</p>
+                <p className="mt-1 text-sm text-charcoal-800 break-all">{method.account}</p>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0 ml-2">
                 <p className="text-xs text-charcoal-500">Transactions</p>
                 <p className="mt-1 text-sm text-charcoal-800">{method.transactions}</p>
               </div>
@@ -117,8 +117,8 @@ export default function Payments() {
 
       {/* ADD PAYMENT METHOD MODAL */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-[420px] rounded-lg bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-[420px] max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-brass-100 pb-3">
               <div>
                 <h2 className="font-display text-lg font-bold text-bottle-900">Add Payment Method</h2>
@@ -199,7 +199,7 @@ export default function Payments() {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <button
                 onClick={() => setShowModal(false)}
                 className="rounded border border-gray-300 px-5 py-2 text-sm text-charcoal-800 hover:bg-gray-50"
