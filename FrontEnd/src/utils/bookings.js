@@ -3,6 +3,8 @@ import { sendMessage } from './messages';
 
 const STORAGE_KEY = 'mmb_bookings';
 
+export const MAX_EVENTS_PER_DAY = 3;
+
 export function getBookings() {
   return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 }
@@ -11,7 +13,22 @@ function saveBookings(bookings) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
 }
 
+// Declined bookings don't take up a slot.
+export function countBookingsOnDate(dateStr) {
+  if (!dateStr) return 0;
+  return getBookings().filter(
+    (b) => (b.form?.eventDate || b.date) === dateStr && b.status !== 'Declined'
+  ).length;
+}
+
+export function isDateFull(dateStr) {
+  return countBookingsOnDate(dateStr) >= MAX_EVENTS_PER_DAY;
+}
+
 export function addBooking(booking) {
+  // Safety net: the form already blocks full dates, but never save past the limit.
+  if (isDateFull(booking.form?.eventDate || booking.date)) return null;
+
   const bookings = getBookings();
   const newBooking = {
     id: bookings.length ? Math.max(...bookings.map((b) => b.id)) + 1 : 1,

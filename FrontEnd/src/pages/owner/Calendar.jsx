@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { getBookings } from '../../utils/bookings';
+import { getBookings, MAX_EVENTS_PER_DAY } from '../../utils/bookings';
 
 export default function Calendar() {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export default function Calendar() {
   useEffect(() => {
     const bookings = getBookings();
     const mapped = bookings
-      .filter((b) => b.form?.eventDate)
+      .filter((b) => b.form?.eventDate && b.status !== 'Declined')
       .map((b) => ({
         id: b.id,
         date: b.form.eventDate,
@@ -79,13 +79,18 @@ export default function Calendar() {
               if (!day) return <div key={idx} />;
               const dayEvents = eventsForDay(day);
               const isSelected = day === selectedDay;
+              const isFull = dayEvents.length >= MAX_EVENTS_PER_DAY;
 
               return (
                 <button
                   key={idx}
                   onClick={() => setSelectedDay(day)}
                   className={`h-12 md:h-16 rounded flex flex-col items-center justify-start pt-1 transition-colors ${
-                    isSelected ? 'bg-forest-700 text-ivory-50' : 'text-charcoal-800 hover:bg-ivory-50'
+                    isSelected
+                      ? 'bg-forest-700 text-ivory-50'
+                      : isFull
+                        ? 'bg-red-50 text-charcoal-800 hover:bg-red-100'
+                        : 'text-charcoal-800 hover:bg-ivory-50'
                   }`}
                 >
                   <span>{day}</span>
@@ -105,7 +110,7 @@ export default function Calendar() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-5 mt-4 pt-3 border-t border-brass-100 text-xs text-charcoal-500">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 pt-3 border-t border-brass-100 text-xs text-charcoal-500">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-sm bg-brass-500 inline-block" />
               Pending
@@ -114,13 +119,22 @@ export default function Calendar() {
               <span className="w-3 h-3 rounded-sm bg-forest-700 inline-block" />
               Booked / Approved
             </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-red-100 border border-red-200 inline-block" />
+              Fully booked ({MAX_EVENTS_PER_DAY}/{MAX_EVENTS_PER_DAY})
+            </div>
           </div>
         </div>
 
         {/* Side panel */}
         <div className="space-y-4">
           <div className="bg-white rounded-lg shadow p-4">
-            <h3 className="font-display font-semibold text-bottle-900 mb-3">Events for {monthName} {selectedDay}</h3>
+            <div className="flex items-baseline justify-between mb-3">
+              <h3 className="font-display font-semibold text-bottle-900">Events for {monthName} {selectedDay}</h3>
+              <span className="text-xs text-charcoal-500">
+                {selectedEvents.length} of {MAX_EVENTS_PER_DAY}
+              </span>
+            </div>
             {selectedEvents.length === 0 && (
               <p className="text-charcoal-500 text-sm">No events this day.</p>
             )}

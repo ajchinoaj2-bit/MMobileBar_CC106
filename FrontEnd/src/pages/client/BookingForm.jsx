@@ -1,7 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 import { getPackages } from '../../utils/packages';
-import { addBooking } from '../../utils/bookings';
+import { addBooking, countBookingsOnDate, MAX_EVENTS_PER_DAY } from '../../utils/bookings';
+
+const toDateString = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const prettyDate = (str) => {
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
+// Next few dates after `fromDateStr` that still have a free slot.
+function nextAvailableDates(fromDateStr, count = 3) {
+  const [y, m, d] = fromDateStr.split('-').map(Number);
+  const cursor = new Date(y, m - 1, d);
+  const results = [];
+  let guard = 0;
+
+  while (results.length < count && guard < 120) {
+    cursor.setDate(cursor.getDate() + 1);
+    const candidate = toDateString(cursor);
+    if (countBookingsOnDate(candidate) < MAX_EVENTS_PER_DAY) results.push(candidate);
+    guard += 1;
+  }
+  return results;
+}
 
 export default function BookingForm() {
   const [searchParams] = useSearchParams();
@@ -31,6 +60,11 @@ export default function BookingForm() {
   );
 
   const [selectedAddOns, setSelectedAddOns] = useState(location.state?.selectedAddOns || []);
+  const [showFullModal, setShowFullModal] = useState(false);
+
+  const slotsTaken = countBookingsOnDate(form.eventDate);
+  const dateFull = Boolean(form.eventDate) && slotsTaken >= MAX_EVENTS_PER_DAY;
+  const suggestions = showFullModal && form.eventDate ? nextAvailableDates(form.eventDate) : [];
 
   const toggleAddOn = (addOn) => {
     setSelectedAddOns((prev) =>
@@ -42,8 +76,26 @@ export default function BookingForm() {
     setForm({ ...form, [field]: e.target.value });
   };
 
+  const handleDateChange = (e) => {
+    const value = e.target.value;
+    setForm({ ...form, eventDate: value });
+    if (value && countBookingsOnDate(value) >= MAX_EVENTS_PER_DAY) {
+      setShowFullModal(true);
+    }
+  };
+
+  const pickDate = (dateStr) => {
+    setForm({ ...form, eventDate: dateStr });
+    setShowFullModal(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (dateFull) {
+      setShowFullModal(true);
+      return;
+    }
 
     const newBooking = addBooking({
       client: JSON.parse(localStorage.getItem('currentUser') || 'null')?.fullname || 'Guest Client',
@@ -55,6 +107,11 @@ export default function BookingForm() {
       form,
     });
 
+    if (!newBooking) {
+      setShowFullModal(true);
+      return;
+    }
+
     navigate(`/client/booking-confirmation?pkg=${pkgId}`, {
       state: { form, selectedAddOns, bookingId: newBooking.id },
     });
@@ -65,9 +122,9 @@ export default function BookingForm() {
 
   return (
     <div className="h-full">
-      <div className="grid grid-cols-3 gap-6">
-        <form onSubmit={handleSubmit} className="col-span-2 bg-white rounded-lg shadow p-5 space-y-3">
-          <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <form onSubmit={handleSubmit} className="lg:col-span-2 bg-white rounded-lg shadow p-5 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-charcoal-500">Event Name</label>
               <input
@@ -97,16 +154,26 @@ export default function BookingForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-charcoal-500">Event Date</label>
               <input
                 type="date"
                 value={form.eventDate}
-                onChange={handleChange('eventDate')}
-                className={inputClass}
+                onChange={handleDateChange}
+                className={`${inputClass} ${dateFull ? 'border-red-400 focus:border-red-500' : ''}`}
                 required
               />
+              {dateFull && (
+                <p className="text-red-500 text-xs mt-1">
+                  This date is fully booked. Please choose another date.
+                </p>
+              )}
+              {!dateFull && form.eventDate && slotsTaken > 0 && (
+                <p className="text-charcoal-500 text-xs mt-1">
+                  {slotsTaken} of {MAX_EVENTS_PER_DAY} slots taken on this date.
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs text-charcoal-500">Event Time</label>
@@ -155,9 +222,34 @@ export default function BookingForm() {
             />
           </div>
 
+          {dateFull && (
+            <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg p-3">
+              <FaExclamationTriangle className="text-red-500 mt-0.5 shrink-0" />
+              <div className="text-sm">
+                <p className="font-semibold text-red-700">
+                  Fully booked on {prettyDate(form.eventDate)}
+                </p>
+                <p className="text-red-600 text-xs mt-0.5">
+                  We can only take {MAX_EVENTS_PER_DAY} events per day. Pick another date to continue.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowFullModal(true)}
+                  className="text-red-700 text-xs font-medium underline mt-1"
+                >
+                  See available dates
+                </button>
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-brass-500 text-bottle-900 font-medium text-sm py-2.5 rounded hover:bg-brass-600 transition-colors"
+            className={`w-full font-medium text-sm py-2.5 rounded transition-colors ${
+              dateFull
+                ? 'bg-brass-500/50 text-bottle-900/70 hover:bg-brass-500/60'
+                : 'bg-brass-500 text-bottle-900 hover:bg-brass-600'
+            }`}
           >
             Submit Booking
           </button>
@@ -215,6 +307,63 @@ export default function BookingForm() {
           </div>
         </div>
       </div>
+
+      {/* Fully booked pop-up */}
+      {showFullModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="flex items-start justify-between p-6 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                  <FaExclamationTriangle className="text-red-500" />
+                </div>
+                <h2 className="font-display text-lg font-bold text-bottle-900">This date is fully booked</h2>
+              </div>
+              <button
+                onClick={() => setShowFullModal(false)}
+                className="text-charcoal-500 hover:text-forest-700"
+                aria-label="Close"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="px-6 pb-2">
+              <p className="text-sm text-charcoal-500">
+                {form.eventDate ? prettyDate(form.eventDate) : 'That date'} is fully booked.     
+                 We sincerely apologize, if possible please choose another date.              
+              </p>
+
+              {suggestions.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-forest-700 mb-2">Next available dates</p>
+                  <div className="flex flex-wrap gap-2">
+                    {suggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => pickDate(s)}
+                        className="border border-brass-400/60 text-forest-700 text-xs font-medium px-3 py-1.5 rounded hover:bg-brass-100 transition-colors"
+                      >
+                        {prettyDate(s)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 pt-5">
+              <button
+                onClick={() => setShowFullModal(false)}
+                className="w-full bg-brass-500 text-bottle-900 font-medium py-2.5 rounded text-sm hover:bg-brass-600 transition-colors"
+              >
+                Choose another date
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
