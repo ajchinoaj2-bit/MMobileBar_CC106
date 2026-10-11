@@ -1,17 +1,29 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBookings } from '../../utils/bookings';
+import MMOBILEBAR1 from '../../assets/images/MMOBILEBAR1.PNG';
+import MMOBILEBAR1SIDE1 from '../../assets/images/MMOBILEBAR1SIDE1.PNG';
+import MMOBILEBAR1SIDE2 from '../../assets/images/MMOBILEBAR1SIDE2.PNG';
+import MMOBILEBAR2 from '../../assets/images/MMOBILEBAR2.PNG';
+import MMOBILEBAR2SIDE1 from '../../assets/images/MMOBILEBAR2SIDE1.PNG';
+import MMOBILEBAR2SIDE2 from '../../assets/images/MMOBILEBAR2SIDE2.PNG';
 
 const packages = [
   {
     id: 1,
     name: 'The Classic Pour (Package 1)',
     desc: 'Standard mobile bar setup perfect for small to medium gathering. Includes basic mixers and garnishes.',
+    image: MMOBILEBAR1,
+    leftImage: MMOBILEBAR1SIDE1,
+    rightImage: MMOBILEBAR1SIDE2,
   },
   {
     id: 2,
     name: 'Premium Mixology (Package 2)',
     desc: 'Elevate your event with signature cocktails crafted by our expert mixologists.',
+    image: MMOBILEBAR2,
+    leftImage: MMOBILEBAR2SIDE1,
+    rightImage: MMOBILEBAR2SIDE2,
   },
 ];
 
@@ -24,12 +36,14 @@ function getStepsForStatus(status) {
       { label: 'Ready for Event', done: false },
     ];
   }
+
   if (status === 'Declined') {
     return [
       { label: 'Request Submitted', done: true },
       { label: 'Booking Declined', done: true, active: true },
     ];
   }
+
   return [
     { label: 'Request Submitted', done: true },
     { label: 'Deposit Pending', done: true, active: true },
@@ -43,7 +57,10 @@ export default function ClientDashboard() {
   const [latestBooking, setLatestBooking] = useState(null);
 
   useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const currentUser = JSON.parse(
+      localStorage.getItem('currentUser') || 'null'
+    );
+
     const allBookings = getBookings();
 
     const myBookings = currentUser
@@ -53,25 +70,60 @@ export default function ClientDashboard() {
     setLatestBooking(myBookings[myBookings.length - 1] || null);
   }, []);
 
-  const bookingSteps = latestBooking ? getStepsForStatus(latestBooking.status) : [];
+  const bookingSteps = latestBooking
+    ? getStepsForStatus(latestBooking.status)
+    : [];
 
   return (
     <div className="p-6">
-      <div className="grid grid-cols-3 gap-8 mt-1">
-        {/* Available Packages */}
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-1">
+        <div className="lg:col-span-2">
           <h2 className="font-display text-xl font-semibold text-bottle-900 mb-10 border-b border-brass-200 pb-3">
             Available Packages
           </h2>
-          <div className="grid grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {packages.map((pkg) => (
-              <div key={pkg.id} className="bg-white rounded-lg shadow overflow-hidden flex flex-col">
-                <div className="bg-gradient-to-br from-bottle-900 to-forest-700 h-40 flex items-center justify-center">
-                  <span className="font-display text-ivory-50/40 text-sm">M Mobile Bar</span>
+              <div
+                key={pkg.id}
+                className="bg-white rounded-lg shadow overflow-hidden flex flex-col"
+              >
+                {/* Side 1 | Main | Side 2 */}
+                <div className="h-48 bg-bottle-900 grid grid-cols-3 gap-1">
+                  <div className="overflow-hidden">
+                    <img
+                      src={pkg.leftImage}
+                      alt={`${pkg.name} side view 1`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="overflow-hidden">
+                    <img
+                      src={pkg.image}
+                      alt={`${pkg.name} mobile bar setup`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="overflow-hidden">
+                    <img
+                      src={pkg.rightImage}
+                      alt={`${pkg.name} side view 2`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
+
                 <div className="p-5 flex flex-col flex-1">
-                  <h3 className="font-display font-semibold text-base text-bottle-900">{pkg.name}</h3>
-                  <p className="text-charcoal-500 text-sm mt-2 mb-4 flex-1">{pkg.desc}</p>
+                  <h3 className="font-display font-semibold text-base text-bottle-900">
+                    {pkg.name}
+                  </h3>
+
+                  <p className="text-charcoal-500 text-sm mt-2 mb-4 flex-1">
+                    {pkg.desc}
+                  </p>
+
                   <button
                     onClick={() => navigate('/client/package')}
                     className="w-full bg-brass-500 text-bottle-900 font-medium text-sm py-2.5 rounded hover:bg-brass-600 transition-colors"
@@ -84,17 +136,29 @@ export default function ClientDashboard() {
           </div>
         </div>
 
-        {/* Upcoming Booking + Status */}
-        <div className="space-y-6 mt-20">
+        <div className="space-y-6 lg:mt-20">
           <div className="bg-white rounded-lg shadow p-5">
-            <h2 className="font-display text-lg font-semibold text-bottle-900 mb-3">Upcoming Booking</h2>
+            <h2 className="font-display text-lg font-semibold text-bottle-900 mb-3">
+              Upcoming Booking
+            </h2>
+
             {latestBooking ? (
               <>
-                <p className="text-sm text-forest-700 font-medium">{latestBooking.date || '—'}</p>
-                <p className="text-base font-semibold mt-1 text-charcoal-800">{latestBooking.event || 'Untitled Event'}</p>
-                <p className="text-sm text-charcoal-500 mb-3">{latestBooking.package}</p>
+                <p className="text-sm text-forest-700 font-medium">
+                  {latestBooking.date || '—'}
+                </p>
+
+                <p className="text-base font-semibold mt-1 text-charcoal-800">
+                  {latestBooking.event || 'Untitled Event'}
+                </p>
+
+                <p className="text-sm text-charcoal-500 mb-3">
+                  {latestBooking.package}
+                </p>
+
                 <div className="flex justify-between items-center text-sm text-charcoal-500">
                   <span>ID: #B-{latestBooking.id}</span>
+
                   <button
                     onClick={() => navigate('/client/booking-history')}
                     className="text-forest-700 hover:text-brass-600 underline"
@@ -104,12 +168,17 @@ export default function ClientDashboard() {
                 </div>
               </>
             ) : (
-              <p className="text-sm text-charcoal-500">No bookings yet. Browse a package to get started.</p>
+              <p className="text-sm text-charcoal-500">
+                No bookings yet. Browse a package to get started.
+              </p>
             )}
           </div>
 
           <div className="bg-white rounded-lg shadow p-5">
-            <h2 className="font-display text-lg font-semibold text-bottle-900 mb-4">Booking Status</h2>
+            <h2 className="font-display text-lg font-semibold text-bottle-900 mb-4">
+              Booking Status
+            </h2>
+
             {bookingSteps.length > 0 ? (
               <div className="space-y-4">
                 {bookingSteps.map((step) => (
@@ -121,9 +190,14 @@ export default function ClientDashboard() {
                           : 'bg-white border-gray-300'
                       }`}
                     />
+
                     <span
                       className={`text-base ${
-                        step.active ? 'font-semibold text-bottle-900' : step.done ? 'text-charcoal-800' : 'text-charcoal-500/60'
+                        step.active
+                          ? 'font-semibold text-bottle-900'
+                          : step.done
+                            ? 'text-charcoal-800'
+                            : 'text-charcoal-500/60'
                       }`}
                     >
                       {step.label}
@@ -132,7 +206,9 @@ export default function ClientDashboard() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-charcoal-500">No active booking to track.</p>
+              <p className="text-sm text-charcoal-500">
+                No active booking to track.
+              </p>
             )}
           </div>
         </div>

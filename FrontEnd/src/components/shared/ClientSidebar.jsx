@@ -69,12 +69,21 @@ export default function ClientSidebar({ open, onClose }) {
           </nav>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-6 py-4 text-sm text-ivory-100/70 hover:bg-forest-700/30 hover:text-ivory-50 transition-colors"
-        >
-          <FaSignOutAlt /> Logout
-        </button>
+        {/* Logout section */}
+        <div className="pb-5">
+          {/* Divider line */}
+          <div className="border-t border-brass-500/30 mb-4" />
+
+          <div className="px-4">
+            <button
+              onClick={handleLogout}
+              className="group w-full flex items-center gap-10 px-5 py-3 rounded-full border border-forest-700 text-base font-medium text-ivory-100/80 transition-all duration-200 hover:bg-forest-700/60 hover:border-brass-500 hover:text-brass-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brass-500/60 active:scale-[0.98]"
+            >
+              <FaSignOutAlt className="text-base transition-transform duration-200 group-hover:translate-x-0.5" />
+              Logout
+            </button>
+          </div>
+        </div>
       </aside>
     </>
   );

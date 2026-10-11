@@ -36,15 +36,17 @@ export default function BookingForm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const pkgId = Number(searchParams.get('pkg')) || 1;
 
   const [packages, setPackages] = useState([]);
   useEffect(() => {
     setPackages(getPackages());
   }, []);
 
-  const selectedPackage = packages.find((p) => p.id === pkgId) || packages[0] || {
-    title: '', price: '0', addOns: [],
+  // Starts on the package from the "Book Now" link; 0 means "use the first package".
+  const [chosenPkgId, setChosenPkgId] = useState(Number(searchParams.get('pkg')) || 0);
+
+  const selectedPackage = packages.find((p) => p.id === chosenPkgId) || packages[0] || {
+    id: '', title: '', price: '0', addOns: [],
   };
 
   const [form, setForm] = useState(
@@ -65,6 +67,11 @@ export default function BookingForm() {
   const slotsTaken = countBookingsOnDate(form.eventDate);
   const dateFull = Boolean(form.eventDate) && slotsTaken >= MAX_EVENTS_PER_DAY;
   const suggestions = showFullModal && form.eventDate ? nextAvailableDates(form.eventDate) : [];
+
+  const handlePackageChange = (e) => {
+    setChosenPkgId(Number(e.target.value));
+    setSelectedAddOns([]); // add-ons belong to a specific package
+  };
 
   const toggleAddOn = (addOn) => {
     setSelectedAddOns((prev) =>
@@ -112,7 +119,7 @@ export default function BookingForm() {
       return;
     }
 
-    navigate(`/client/booking-confirmation?pkg=${pkgId}`, {
+    navigate(`/client/booking-confirmation?pkg=${selectedPackage.id}`, {
       state: { form, selectedAddOns, bookingId: newBooking.id },
     });
   };
@@ -232,13 +239,6 @@ export default function BookingForm() {
                 <p className="text-red-600 text-xs mt-0.5">
                   We can only take {MAX_EVENTS_PER_DAY} events per day. Pick another date to continue.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setShowFullModal(true)}
-                  className="text-red-700 text-xs font-medium underline mt-1"
-                >
-                  See available dates
-                </button>
               </div>
             </div>
           )}
@@ -258,10 +258,20 @@ export default function BookingForm() {
         <div className="space-y-4">
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="font-display font-semibold text-bottle-900 mb-3">Selected Package Summary</h2>
-            <div className="text-sm space-y-2">
-              <div className="flex justify-between">
-                <span className="text-charcoal-500">Base Package</span>
-                <span className="text-charcoal-800">{selectedPackage.title}</span>
+            <div className="text-sm space-y-3">
+              <div>
+                <label className="text-xs text-charcoal-500">Base Package</label>
+                <select
+                  value={selectedPackage.id}
+                  onChange={handlePackageChange}
+                  className={inputClass}
+                >
+                  {packages.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title} — ₱{p.price}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex justify-between">
                 <span className="text-charcoal-500">Price</span>
@@ -330,8 +340,8 @@ export default function BookingForm() {
 
             <div className="px-6 pb-2">
               <p className="text-sm text-charcoal-500">
-                {form.eventDate ? prettyDate(form.eventDate) : 'That date'} is fully booked.     
-                 We sincerely apologize, if possible please choose another date.              
+                We're sorry, {form.eventDate ? prettyDate(form.eventDate) : 'that date'} has
+                no slots left. If possible, please choose another date.
               </p>
 
               {suggestions.length > 0 && (
