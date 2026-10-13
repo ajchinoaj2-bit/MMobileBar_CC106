@@ -1,9 +1,9 @@
+
 const ACCOUNTS_KEY = 'mmb_accounts';
 const CURRENT_USER_KEY = 'currentUser';
 const OWNER_KEY = 'mmb_owner_profile';
 
-// Owner account is provisioned directly in the system, not through public signup.
-// Edits made in the profile modal are saved as overrides on top of these defaults.
+// Owner account defaults
 const OWNER_DEFAULTS = {
   email: 'owner@mmobilebar.com',
   password: 'Owner@123',
@@ -27,10 +27,13 @@ function getOwnerAccount() {
 
 function saveOwnerOverrides(updates) {
   const overrides = JSON.parse(localStorage.getItem(OWNER_KEY) || '{}');
-  localStorage.setItem(OWNER_KEY, JSON.stringify({ ...overrides, ...updates }));
+  localStorage.setItem(
+    OWNER_KEY,
+    JSON.stringify({ ...overrides, ...updates })
+  );
 }
 
-// The session never stores the password.
+// Session never stores the password.
 function toSession(account) {
   return {
     fullname: account.fullname,
@@ -59,22 +62,44 @@ export function logout() {
 
 function emailTaken(email, exceptEmail = '') {
   const target = email.trim().toLowerCase();
-  if (target === exceptEmail.toLowerCase()) return false;
-  if (getOwnerAccount().email.toLowerCase() === target) return true;
-  return getAccounts().some((a) => a.email.toLowerCase() === target);
+
+  if (target === exceptEmail.toLowerCase()) {
+    return false;
+  }
+
+  if (getOwnerAccount().email.toLowerCase() === target) {
+    return true;
+  }
+
+  return getAccounts().some(
+    (account) => account.email.toLowerCase() === target
+  );
 }
 
 function passwordError(password) {
-  if (!password) return 'Password is required.';
-  if (/\s/.test(password)) return 'Password cannot contain spaces.';
-  if (password.length < 8) return 'Password must be at least 8 characters.';
+  if (!password) {
+    return 'Password is required.';
+  }
+
+  if (/\s/.test(password)) {
+    return 'Password cannot contain spaces.';
+  }
+
+  if (password.length < 8) {
+    return 'Password must be at least 8 characters.';
+  }
+
   if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
     return 'Password must include both letters and numbers.';
   }
+
   return '';
 }
 
-function validateBasics({ fullname, username, email }, exceptEmail = '') {
+function validateBasics(
+  { fullname, username, email },
+  exceptEmail = ''
+) {
   const errors = {};
 
   if (!fullname || !fullname.trim()) {
@@ -93,7 +118,10 @@ function validateBasics({ fullname, username, email }, exceptEmail = '') {
 
   if (!email || !email.trim()) {
     errors.email = 'Email is required.';
-  } else if (/\s/.test(email) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+  } else if (
+    /\s/.test(email) ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+  ) {
     errors.email = 'Enter a valid email address.';
   } else if (emailTaken(email, exceptEmail)) {
     errors.email = 'An account with this email already exists.';
@@ -102,11 +130,20 @@ function validateBasics({ fullname, username, email }, exceptEmail = '') {
   return errors;
 }
 
-export function validateSignup({ fullname, username, email, password, confirmPassword }) {
+export function validateSignup({
+  fullname,
+  username,
+  email,
+  password,
+  confirmPassword,
+}) {
   const errors = validateBasics({ fullname, username, email });
 
   const pwError = passwordError(password);
-  if (pwError) errors.password = pwError;
+
+  if (pwError) {
+    errors.password = pwError;
+  }
 
   if (password !== confirmPassword) {
     errors.confirmPassword = 'Passwords do not match.';
@@ -123,7 +160,10 @@ export function validateNewPassword(newPassword, confirmPassword) {
   const errors = {};
 
   const pwError = passwordError(newPassword);
-  if (pwError) errors.next = pwError;
+
+  if (pwError) {
+    errors.next = pwError;
+  }
 
   if (newPassword !== confirmPassword) {
     errors.confirm = 'Passwords do not match.';
@@ -132,74 +172,138 @@ export function validateNewPassword(newPassword, confirmPassword) {
   return errors;
 }
 
-// --- Actions ---
+// --- Signup ---
 
 export function signup({ fullname, username, email, password }) {
   const accounts = getAccounts();
+
   const newAccount = {
     fullname: fullname.trim(),
     username: username.trim(),
     email: email.trim().toLowerCase(),
-    password, // plain text: fine for a local demo, not for production
+    password,
     role: 'client',
     avatar: '',
   };
+
   accounts.push(newAccount);
   saveAccounts(accounts);
+
   return newAccount;
 }
+
+// --- Login ---
 
 export function login(email, password, expectedRole) {
   const trimmedEmail = (email || '').trim().toLowerCase();
 
   if (expectedRole === 'owner') {
     const owner = getOwnerAccount();
-    if (trimmedEmail === owner.email.toLowerCase() && password === owner.password) {
-      return { success: true, user: setSession(owner) };
+
+    if (
+      trimmedEmail === owner.email.toLowerCase() &&
+      password === owner.password
+    ) {
+      return {
+        success: true,
+        user: setSession(owner),
+      };
     }
-    return { success: false, error: 'Invalid owner email or password.' };
+
+    return {
+      success: false,
+      error: 'Invalid owner email or password.',
+    };
   }
 
-  const match = getAccounts().find((a) => a.email === trimmedEmail && a.password === password);
-  if (match) {
-    return { success: true, user: setSession(match) };
-  }
-  return { success: false, error: 'Invalid email or password.' };
-}
-
-// Bookings, messages, notifications and settings are keyed by the client's full name,
-// so a rename has to move them over or the client would lose their history.
-function renameClientData(oldName, newName) {
-  const bookings = JSON.parse(localStorage.getItem('mmb_bookings') || '[]');
-  localStorage.setItem(
-    'mmb_bookings',
-    JSON.stringify(bookings.map((b) => (b.client === oldName ? { ...b, client: newName } : b)))
+  const match = getAccounts().find(
+    (account) =>
+      account.email.toLowerCase() === trimmedEmail &&
+      account.password === password &&
+      account.role === 'client'
   );
 
-  const threads = JSON.parse(localStorage.getItem('mmb_messages') || '{}');
+  if (match) {
+    return {
+      success: true,
+      user: setSession(match),
+    };
+  }
+
+  return {
+    success: false,
+    error: 'Invalid email or password.',
+  };
+}
+
+// --- Keep client data when a client changes their name ---
+
+function renameClientData(oldName, newName) {
+  const bookings = JSON.parse(
+    localStorage.getItem('mmb_bookings') || '[]'
+  );
+
+  localStorage.setItem(
+    'mmb_bookings',
+    JSON.stringify(
+      bookings.map((booking) =>
+        booking.client === oldName
+          ? { ...booking, client: newName }
+          : booking
+      )
+    )
+  );
+
+  const threads = JSON.parse(
+    localStorage.getItem('mmb_messages') || '{}'
+  );
+
   if (threads[oldName]) {
-    threads[newName] = [...(threads[newName] || []), ...threads[oldName]];
+    threads[newName] = [
+      ...(threads[newName] || []),
+      ...threads[oldName],
+    ];
+
     delete threads[oldName];
+
     localStorage.setItem('mmb_messages', JSON.stringify(threads));
   }
 
-  const notifications = JSON.parse(localStorage.getItem('mmb_notifications') || '[]');
-  localStorage.setItem(
-    'mmb_notifications',
-    JSON.stringify(notifications.map((n) => (n.to === oldName ? { ...n, to: newName } : n)))
+  const notifications = JSON.parse(
+    localStorage.getItem('mmb_notifications') || '[]'
   );
 
-  const settings = JSON.parse(localStorage.getItem('mmb_settings') || '{}');
+  localStorage.setItem(
+    'mmb_notifications',
+    JSON.stringify(
+      notifications.map((notification) =>
+        notification.to === oldName
+          ? { ...notification, to: newName }
+          : notification
+      )
+    )
+  );
+
+  const settings = JSON.parse(
+    localStorage.getItem('mmb_settings') || '{}'
+  );
+
   if (settings[oldName]) {
     settings[newName] = settings[oldName];
     delete settings[oldName];
+
     localStorage.setItem('mmb_settings', JSON.stringify(settings));
   }
 }
 
+// --- Update Profile ---
+
 export function updateProfile(updates) {
   const current = getCurrentUser();
-  if (!current) return null;
+
+  if (!current) {
+    return null;
+  }
 
   const patch = {
     fullname: updates.fullname.trim(),
@@ -213,38 +317,169 @@ export function updateProfile(updates) {
     return setSession(getOwnerAccount());
   }
 
-  const accounts = getAccounts().map((a) =>
-    a.email === current.email ? { ...a, ...patch } : a
+  const accounts = getAccounts().map((account) =>
+    account.email === current.email
+      ? { ...account, ...patch }
+      : account
   );
+
   saveAccounts(accounts);
 
   if (patch.fullname !== current.fullname) {
     renameClientData(current.fullname, patch.fullname);
   }
 
-  return setSession(accounts.find((a) => a.email === patch.email));
+  const updatedAccount = accounts.find(
+    (account) => account.email === patch.email
+  );
+
+  if (!updatedAccount) {
+    return null;
+  }
+
+  return setSession(updatedAccount);
 }
+
+// --- Change Password for a logged-in user ---
 
 export function changePassword(currentPassword, newPassword) {
   const current = getCurrentUser();
-  if (!current) return { success: false, error: 'You are not logged in.' };
+
+  if (!current) {
+    return {
+      success: false,
+      error: 'You are not logged in.',
+    };
+  }
+
+  const passwordMessage = passwordError(newPassword);
+
+  if (passwordMessage) {
+    return {
+      success: false,
+      error: passwordMessage,
+    };
+  }
 
   if (current.role === 'owner') {
     if (getOwnerAccount().password !== currentPassword) {
-      return { success: false, error: 'Current password is incorrect.' };
+      return {
+        success: false,
+        error: 'Current password is incorrect.',
+      };
     }
+
     saveOwnerOverrides({ password: newPassword });
+
     return { success: true };
   }
 
   const accounts = getAccounts();
-  const account = accounts.find((a) => a.email === current.email);
+
+  const account = accounts.find(
+    (item) => item.email === current.email
+  );
+
   if (!account || account.password !== currentPassword) {
-    return { success: false, error: 'Current password is incorrect.' };
+    return {
+      success: false,
+      error: 'Current password is incorrect.',
+    };
   }
 
   saveAccounts(
-    accounts.map((a) => (a.email === current.email ? { ...a, password: newPassword } : a))
+    accounts.map((item) =>
+      item.email === current.email
+        ? { ...item, password: newPassword }
+        : item
+    )
   );
+
   return { success: true };
+}
+
+// --- Forgot Password / Reset Password ---
+
+export function resetPassword(
+  email,
+  role,
+  newPassword,
+  confirmPassword
+) {
+  const normalizedEmail = (email || '').trim().toLowerCase();
+
+  if (!normalizedEmail) {
+    return {
+      success: false,
+      error: 'Please enter your email address.',
+    };
+  }
+
+  const passwordErrors = validateNewPassword(
+    newPassword,
+    confirmPassword
+  );
+
+  if (passwordErrors.next) {
+    return {
+      success: false,
+      error: passwordErrors.next,
+    };
+  }
+
+  if (passwordErrors.confirm) {
+    return {
+      success: false,
+      error: passwordErrors.confirm,
+    };
+  }
+
+  if (role === 'owner') {
+    const owner = getOwnerAccount();
+
+    if (
+      normalizedEmail !== owner.email.trim().toLowerCase()
+    ) {
+      return {
+        success: false,
+        error: 'No owner account was found with that email.',
+      };
+    }
+
+    saveOwnerOverrides({ password: newPassword });
+
+    return {
+      success: true,
+      message: 'Password reset successfully! You can now log in.',
+    };
+  }
+
+  const accounts = getAccounts();
+
+  const accountExists = accounts.some(
+    (account) =>
+      account.email.trim().toLowerCase() === normalizedEmail &&
+      account.role === 'client'
+  );
+
+  if (!accountExists) {
+    return {
+      success: false,
+      error: 'No client account was found with that email.',
+    };
+  }
+
+  saveAccounts(
+    accounts.map((account) =>
+      account.email.trim().toLowerCase() === normalizedEmail &&
+      account.role === 'client'
+        ? { ...account, password: newPassword }
+        : account
+    )
+  );
+
+  return {
+    success: true,
+    message: 'Password reset successfully! You can now log in.',
+  };
 }

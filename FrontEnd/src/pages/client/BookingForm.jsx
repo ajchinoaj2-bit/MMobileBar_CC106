@@ -125,12 +125,12 @@ export default function BookingForm() {
   };
 
   const inputClass =
-    'w-full mt-1 border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-brass-500 transition-colors';
+     'w-full mt-1.5 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-brass-500 focus:ring-2 focus:ring-brass-500/10 transition-all placeholder:text-gray-400 bg-white';
 
   return (
     <div className="h-full">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <form onSubmit={handleSubmit} className="lg:col-span-2 bg-white rounded-lg shadow p-5 space-y-3">
+        <form onSubmit={handleSubmit} className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5 h-fit">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-charcoal-500">Event Name</label>
@@ -166,6 +166,7 @@ export default function BookingForm() {
               <label className="text-xs text-charcoal-500">Event Date</label>
               <input
                 type="date"
+                min={toDateString(new Date(new Date().setDate(new Date().getDate() + 1)))}
                 value={form.eventDate}
                 onChange={handleDateChange}
                 className={`${inputClass} ${dateFull ? 'border-red-400 focus:border-red-500' : ''}`}
@@ -219,7 +220,9 @@ export default function BookingForm() {
           </div>
 
           <div>
-            <label className="text-xs text-charcoal-500">Additional Requests</label>
+            <label className="text-sm font-medium text-charcoal-700">
+              Additional Requests <span className="text-charcoal-500 font-normal">(Optional)</span>
+            </label>
             <textarea
               value={form.requests}
               onChange={handleChange('requests')}
@@ -255,7 +258,7 @@ export default function BookingForm() {
           </button>
         </form>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4 lg:min-h-[calc(100vh-11rem)]">
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="font-display font-semibold text-bottle-900 mb-3">Selected Package Summary</h2>
             <div className="text-sm space-y-3">
@@ -285,9 +288,9 @@ export default function BookingForm() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-4">
+          <div className="bg-white rounded-lg shadow p-4 flex-1">
             <p className="text-sm font-semibold text-forest-700 mb-2">Add Ons</p>
-            <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 gap-1.5 pr-1">
               {(selectedPackage.addOns || []).map((addOn) => (
                 <label
                   key={addOn}
@@ -308,7 +311,7 @@ export default function BookingForm() {
             </p>
           </div>
 
-          <div className="bg-brass-100/60 border border-brass-300/50 rounded-lg p-4 text-xs text-bottle-900">
+          <div className="bg-brass-100/60 border border-brass-300/50 rounded-lg p-4 text-xs text-bottle-900 shrink-0">
             <p className="font-semibold mb-1">Booking Process</p>
             <p className="text-charcoal-800">
               Submitting this form does not confirm your booking. Our team will review your request
