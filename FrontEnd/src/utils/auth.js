@@ -12,21 +12,59 @@ const OWNER_DEFAULTS = {
   role: 'owner',
 };
 
+// Premade client account
+const DEMO_CLIENT = {
+  fullname: 'Demo Client',
+  username: 'democlient',
+  email: 'client@mmobilebar.com',
+  password: 'Client123!',
+  role: 'client',
+  avatar: '',
+};
+
 function getAccounts() {
-  return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]');
+  const accounts = JSON.parse(
+    localStorage.getItem(ACCOUNTS_KEY) || '[]'
+  );
+
+  const exists = accounts.some(
+    (account) =>
+      account.email?.toLowerCase() ===
+      DEMO_CLIENT.email.toLowerCase()
+  );
+
+  if (!exists) {
+    accounts.push(DEMO_CLIENT);
+    saveAccounts(accounts);
+  }
+
+  return accounts;
 }
 
 function saveAccounts(accounts) {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  localStorage.setItem(
+    ACCOUNTS_KEY,
+    JSON.stringify(accounts)
+  );
 }
 
 function getOwnerAccount() {
-  const overrides = JSON.parse(localStorage.getItem(OWNER_KEY) || '{}');
-  return { ...OWNER_DEFAULTS, ...overrides, role: 'owner' };
+  const overrides = JSON.parse(
+    localStorage.getItem(OWNER_KEY) || '{}'
+  );
+
+  return {
+    ...OWNER_DEFAULTS,
+    ...overrides,
+    role: 'owner',
+  };
 }
 
 function saveOwnerOverrides(updates) {
-  const overrides = JSON.parse(localStorage.getItem(OWNER_KEY) || '{}');
+  const overrides = JSON.parse(
+    localStorage.getItem(OWNER_KEY) || '{}'
+  );
+
   localStorage.setItem(
     OWNER_KEY,
     JSON.stringify({ ...overrides, ...updates })
@@ -46,12 +84,19 @@ function toSession(account) {
 
 function setSession(account) {
   const session = toSession(account);
-  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
+
+  localStorage.setItem(
+    CURRENT_USER_KEY,
+    JSON.stringify(session)
+  );
+
   return session;
 }
 
 export function getCurrentUser() {
-  return JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
+  return JSON.parse(
+    localStorage.getItem(CURRENT_USER_KEY) || 'null'
+  );
 }
 
 export function logout() {
@@ -89,7 +134,10 @@ function passwordError(password) {
     return 'Password must be at least 8 characters.';
   }
 
-  if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+  if (
+    !/[A-Za-z]/.test(password) ||
+    !/[0-9]/.test(password)
+  ) {
     return 'Password must include both letters and numbers.';
   }
 
@@ -138,7 +186,6 @@ export function validateSignup({
   confirmPassword,
 }) {
   const errors = validateBasics({ fullname, username, email });
-
   const pwError = passwordError(password);
 
   if (pwError) {
@@ -158,7 +205,6 @@ export function validateProfileUpdate(values, originalEmail) {
 
 export function validateNewPassword(newPassword, confirmPassword) {
   const errors = {};
-
   const pwError = passwordError(newPassword);
 
   if (pwError) {
@@ -266,7 +312,10 @@ function renameClientData(oldName, newName) {
 
     delete threads[oldName];
 
-    localStorage.setItem('mmb_messages', JSON.stringify(threads));
+    localStorage.setItem(
+      'mmb_messages',
+      JSON.stringify(threads)
+    );
   }
 
   const notifications = JSON.parse(
@@ -292,7 +341,10 @@ function renameClientData(oldName, newName) {
     settings[newName] = settings[oldName];
     delete settings[oldName];
 
-    localStorage.setItem('mmb_settings', JSON.stringify(settings));
+    localStorage.setItem(
+      'mmb_settings',
+      JSON.stringify(settings)
+    );
   }
 }
 
@@ -340,7 +392,7 @@ export function updateProfile(updates) {
   return setSession(updatedAccount);
 }
 
-// --- Change Password for a logged-in user ---
+// --- Change Password ---
 
 export function changePassword(currentPassword, newPassword) {
   const current = getCurrentUser();
@@ -370,7 +422,6 @@ export function changePassword(currentPassword, newPassword) {
     }
 
     saveOwnerOverrides({ password: newPassword });
-
     return { success: true };
   }
 
@@ -437,9 +488,7 @@ export function resetPassword(
   if (role === 'owner') {
     const owner = getOwnerAccount();
 
-    if (
-      normalizedEmail !== owner.email.trim().toLowerCase()
-    ) {
+    if (normalizedEmail !== owner.email.trim().toLowerCase()) {
       return {
         success: false,
         error: 'No owner account was found with that email.',
