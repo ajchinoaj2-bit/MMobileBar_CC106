@@ -34,7 +34,11 @@ export default function Login() {
     }
 
     setError('');
-    navigate(role === 'owner' ? '/owner/dashboard' : '/client/dashboard');
+    navigate(
+      role === 'owner'
+        ? '/owner/dashboard'
+        : '/client/dashboard'
+    );
   };
 
   const openForgotModal = () => {
@@ -78,7 +82,8 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-bottle-950 flex items-center justify-center gap-16 px-6 py-8">
+    <div className="relative min-h-screen overflow-hidden bg-bottle-950 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 px-4 sm:px-6 py-6 sm:py-8">
+      {/* Background */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -90,31 +95,34 @@ export default function Login() {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-bottle-950/40 to-bottle-950" />
 
       {/* Brand */}
-      <div className="relative flex flex-col items-center text-center">
+      <div className="relative flex flex-col items-center text-center w-full lg:w-auto shrink-0">
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-brass-500/20 blur-2xl scale-125" />
+
           <img
             src={logo}
             alt="M Mobile Bar"
-            className="relative w-40 h-40"
+            className="relative w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40"
           />
         </div>
 
-        <h1 className="font-display text-brass-500 text-4xl font-semibold mt-5 tracking-wide">
+        <h1 className="font-display text-brass-500 text-3xl sm:text-4xl font-semibold mt-3 sm:mt-5 tracking-wide">
           M Mobile Bar
         </h1>
 
-        <div className="flex items-center gap-3 mt-3">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mt-3 max-w-full">
           <span className="h-px w-8 bg-brass-500/50" />
-          <p className="text-ivory-100/50 text-xs uppercase tracking-[0.2em]">
+
+          <p className="text-ivory-100/50 text-[10px] sm:text-xs uppercase tracking-[0.12em] sm:tracking-[0.2em]">
             Event Bar &amp; Beverage Services
           </p>
+
           <span className="h-px w-8 bg-brass-500/50" />
         </div>
       </div>
 
       {/* Login Card */}
-      <div className="relative bg-bottle-900/90 backdrop-blur border border-brass-500/20 rounded-xl p-8 w-full max-w-sm shadow-[0_0_60px_-15px_rgba(201,169,97,0.25)]">
+      <div className="relative bg-bottle-900/90 backdrop-blur border border-brass-500/20 rounded-xl p-5 sm:p-8 w-full max-w-sm shadow-[0_0_60px_-15px_rgba(201,169,97,0.25)]">
         <h2 className="font-display text-ivory-50 text-xl font-semibold">
           Welcome Back
         </h2>
@@ -168,7 +176,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email address"
-              className="w-full px-3 py-2 rounded bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500 transition-colors"
+              className="w-full min-w-0 px-3 py-2 rounded bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500 transition-colors"
               required
             />
           </div>
@@ -184,7 +192,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full px-3 py-2 pr-10 rounded bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500 transition-colors"
+                className="w-full min-w-0 px-3 py-2 pr-10 rounded bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500 transition-colors"
                 required
               />
 
@@ -200,10 +208,12 @@ export default function Login() {
           </div>
 
           {error && (
-            <p className="text-red-400 text-xs">{error}</p>
+            <p className="text-red-400 text-xs" role="alert">
+              {error}
+            </p>
           )}
 
-          <div className="flex justify-between items-center text-xs text-ivory-100/60">
+          <div className="flex flex-wrap justify-between items-center gap-3 text-xs text-ivory-100/60">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -243,8 +253,8 @@ export default function Login() {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-bottle-900 border border-brass-500/30 rounded-xl shadow-2xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-bottle-900 border border-brass-500/30 rounded-xl shadow-2xl p-5 sm:p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto my-auto">
             {forgotSuccess ? (
               <>
                 <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
@@ -289,7 +299,7 @@ export default function Login() {
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
                       placeholder="Enter registered email"
-                      className="w-full px-3 py-2.5 rounded-lg bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500"
+                      className="w-full min-w-0 px-3 py-2.5 rounded-lg bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500"
                       autoComplete="email"
                       required
                     />
@@ -305,7 +315,7 @@ export default function Login() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Enter new password"
-                      className="w-full px-3 py-2.5 rounded-lg bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500"
+                      className="w-full min-w-0 px-3 py-2.5 rounded-lg bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500"
                       autoComplete="new-password"
                       required
                     />
@@ -328,14 +338,14 @@ export default function Login() {
                         setConfirmNewPassword(e.target.value)
                       }
                       placeholder="Re-enter new password"
-                      className="w-full px-3 py-2.5 rounded-lg bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500"
+                      className="w-full min-w-0 px-3 py-2.5 rounded-lg bg-bottle-950 border border-forest-700 text-ivory-50 text-sm outline-none focus:border-brass-500"
                       autoComplete="new-password"
                       required
                     />
                   </div>
 
                   {forgotError && (
-                    <p className="text-red-400 text-sm">
+                    <p className="text-red-400 text-sm" role="alert">
                       {forgotError}
                     </p>
                   )}

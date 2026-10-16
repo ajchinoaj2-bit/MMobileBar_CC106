@@ -63,7 +63,7 @@ export default function BookingDetails() {
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h2 className="font-display text-xl font-bold text-forest-700">
+          <h2 className="text-xl font-bold text-green-700">
             Booking #BK-{String(booking.id).padStart(4, '0')}
           </h2>
           <p className="text-charcoal-500 text-sm">

@@ -1,5 +1,15 @@
+
 import { useRef, useState } from 'react';
-import { FaCamera, FaTimes, FaUserCircle, FaLock, FaSave } from 'react-icons/fa';
+import {
+  FaCamera,
+  FaTimes,
+  FaUserCircle,
+  FaLock,
+  FaSave,
+  FaEye,
+  FaEyeSlash,
+} from 'react-icons/fa';
+
 import {
   getCurrentUser,
   updateProfile,
@@ -8,28 +18,105 @@ import {
   validateNewPassword,
 } from '../../utils/auth';
 
-// Crops to a square and shrinks the photo so it doesn't eat localStorage space.
+// Resize the uploaded image to reduce localStorage usage.
 function resizeImage(file, size = 128) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Could not read the image.'));
+
+    reader.onerror = () => {
+      reject(new Error('Could not read the image.'));
+    };
+
     reader.onload = () => {
       const img = new Image();
-      img.onerror = () => reject(new Error('That file is not a valid image.'));
+
+      img.onerror = () => {
+        reject(new Error('That file is not a valid image.'));
+      };
+
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = size;
         canvas.height = size;
+
+        const context = canvas.getContext('2d');
+
+        if (!context) {
+          reject(new Error('Could not process the image.'));
+          return;
+        }
+
         const side = Math.min(img.width, img.height);
         const sx = (img.width - side) / 2;
         const sy = (img.height - side) / 2;
-        canvas.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, size, size);
+
+        context.drawImage(
+          img,
+          sx,
+          sy,
+          side,
+          side,
+          0,
+          0,
+          size,
+          size
+        );
+
         resolve(canvas.toDataURL('image/jpeg', 0.8));
       };
+
       img.src = reader.result;
     };
+
     reader.readAsDataURL(file);
   });
+}
+
+// Password field with its own anchored eye button.
+function PasswordField({
+  label,
+  value,
+  onChange,
+  error,
+  placeholder,
+  autoComplete = 'off',
+}) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className="w-full min-w-0">
+      <label className="block text-xs text-gray-500">
+        {label}
+      </label>
+
+      <div className="relative mt-1 w-full min-w-0">
+        <input
+          type={show ? 'text' : 'password'}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          className="block box-border w-full min-w-0 rounded border border-gray-300 bg-white py-2 pl-3 pr-12 text-sm outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600"
+        />
+
+        <button
+          type="button"
+          onClick={() => setShow((previous) => !previous)}
+          aria-label={show ? 'Hide password' : 'Show password'}
+          title={show ? 'Hide password' : 'Show password'}
+          className="absolute right-0 top-0 flex h-full w-10 items-center justify-center rounded-r text-gray-500 hover:bg-gray-50 hover:text-green-700 focus:outline-none"
+        >
+          {show ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </div>
+
+      {error && (
+        <p className="mt-1 break-words text-xs text-red-500">
+          {error}
+        </p>
+      )}
+    </div>
+  );
 }
 
 export default function ProfileModal({ onClose, onSaved }) {
@@ -41,47 +128,113 @@ export default function ProfileModal({ onClose, onSaved }) {
     username: user?.username || '',
     email: user?.email || '',
   });
+
   const [avatar, setAvatar] = useState(user?.avatar || '');
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
-  const [pw, setPw] = useState({ current: '', next: '', confirm: '' });
+
+  const [pw, setPw] = useState({
+    current: '',
+    next: '',
+    confirm: '',
+  });
+
   const [pwErrors, setPwErrors] = useState({});
   const [pwMessage, setPwMessage] = useState('');
 
+  const inputClass =
+    'mt-1 block box-border w-full min-w-0 rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600';
+
   const handleChange = (field) => (e) => {
-    setProfile({ ...profile, [field]: e.target.value });
+    setProfile((previous) => ({
+      ...previous,
+      [field]: e.target.value,
+    }));
+
+    setErrors((previous) => ({
+      ...previous,
+      [field]: '',
+    }));
+
     setMessage('');
   };
 
   const handleAvatar = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
+
+    // Allow selecting the same image again.
     e.target.value = '';
+
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrors((previous) => ({
+        ...previous,
+        avatar: 'Please select an image file.',
+      }));
+      return;
+    }
+
     try {
-      setAvatar(await resizeImage(file));
+      const resizedImage = await resizeImage(file);
+
+      setAvatar(resizedImage);
+
+      setErrors((previous) => ({
+        ...previous,
+        avatar: '',
+      }));
+
       setMessage('');
-    } catch (err) {
-      setErrors({ ...errors, avatar: err.message });
+    } catch (error) {
+      setErrors((previous) => ({
+        ...previous,
+        avatar: error.message || 'Unable to upload this image.',
+      }));
     }
   };
 
   const handleSave = () => {
-    const found = validateProfileUpdate(profile, user.email);
+    const found = validateProfileUpdate(
+      profile,
+      user?.email || ''
+    );
+
     if (Object.keys(found).length > 0) {
-      setErrors(found);
+      setErrors((previous) => ({
+        ...previous,
+        ...found,
+      }));
+      setMessage('');
       return;
     }
-    setErrors({});
-    updateProfile({ ...profile, avatar });
-    setMessage('Profile updated successfully.');
-    onSaved?.();
+
+    try {
+      updateProfile({
+        ...profile,
+        avatar,
+      });
+
+      setErrors({});
+      setMessage('Profile updated successfully.');
+      onSaved?.();
+    } catch {
+      setMessage('Unable to save your profile. Please try again.');
+    }
   };
 
   const handlePasswordSave = () => {
-    const found = validateNewPassword(pw.next, pw.confirm);
-    if (!pw.current) found.current = 'Enter your current password.';
+    const found = validateNewPassword(
+      pw.next,
+      pw.confirm
+    );
+
+    if (!pw.current) {
+      found.current = 'Enter your current password.';
+    }
+
     if (Object.keys(found).length > 0) {
       setPwErrors(found);
       setPwMessage('');
@@ -89,156 +242,317 @@ export default function ProfileModal({ onClose, onSaved }) {
     }
 
     const result = changePassword(pw.current, pw.next);
+
     if (!result.success) {
-      setPwErrors({ current: result.error });
+      setPwErrors({
+        current: result.error || 'Unable to change password.',
+      });
       setPwMessage('');
       return;
     }
 
     setPwErrors({});
-    setPw({ current: '', next: '', confirm: '' });
+    setPw({
+      current: '',
+      next: '',
+      confirm: '',
+    });
     setPwMessage('Password changed successfully.');
   };
 
-  const inputClass = 'w-full mt-1 border rounded px-3 py-2 text-sm outline-none focus:border-green-600';
+  const handleClose = () => {
+    onClose?.();
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-        <div className="bg-green-700 text-white px-6 py-4 flex items-start justify-between rounded-t-lg">
-          <div>
-            <h2 className="text-xl font-bold">Account Profile</h2>
-            <p className="text-sm text-green-100">Manage your account information and security.</p>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-3 sm:p-5"
+      onClick={handleClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-modal-title"
+        className="my-auto flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex shrink-0 items-start justify-between gap-3 bg-green-700 px-4 py-4 text-white sm:px-6">
+          <div className="min-w-0">
+            <h2
+              id="profile-modal-title"
+              className="text-lg font-bold sm:text-xl"
+            >
+              Account Profile
+            </h2>
+
+            <p className="mt-1 text-xs text-green-100 sm:text-sm">
+              Manage your account information and security.
+            </p>
           </div>
-          <button onClick={onClose} className="text-white hover:text-green-200" aria-label="Close">
+
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="Close profile"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg hover:bg-green-800"
+          >
             <FaTimes />
           </button>
         </div>
 
-        <div className="p-6 flex flex-col sm:flex-row gap-6">
-          <div className="flex flex-col items-center shrink-0">
-            <div className="relative">
-              {avatar ? (
-                <img src={avatar} alt="Profile" className="w-28 h-28 rounded-full object-cover border" />
-              ) : (
-                <FaUserCircle className="w-28 h-28 text-gray-300" />
+        {/* Scrollable content */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="flex flex-col gap-6 p-4 sm:flex-row sm:items-start sm:p-6">
+            {/* Profile photo */}
+            <div className="flex shrink-0 flex-col items-center">
+              <div className="relative">
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt="Profile"
+                    className="h-24 w-24 rounded-full border border-gray-200 object-cover sm:h-28 sm:w-28"
+                  />
+                ) : (
+                  <FaUserCircle className="h-24 w-24 text-gray-300 sm:h-28 sm:w-28" />
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  aria-label="Change profile photo"
+                  title="Change photo"
+                  className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-gray-700 text-white shadow hover:bg-gray-800"
+                >
+                  <FaCamera className="text-sm" />
+                </button>
+
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatar}
+                />
+              </div>
+
+              <p className="mt-2 text-xs text-gray-500">
+                Profile photo
+              </p>
+
+              {errors.avatar && (
+                <p className="mt-1 max-w-36 break-words text-center text-xs text-red-500">
+                  {errors.avatar}
+                </p>
               )}
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="absolute bottom-0 right-0 bg-gray-700 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-800"
-                aria-label="Change photo"
-              >
-                <FaCamera className="text-xs" />
-              </button>
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-            </div>
-            {errors.avatar && <p className="text-red-500 text-xs mt-2 max-w-[8rem] text-center">{errors.avatar}</p>}
-          </div>
-
-          <div className="flex-1 space-y-3">
-            <p className="text-xs font-bold tracking-wide text-green-700">PERSONAL INFORMATION</p>
-
-            <div>
-              <label className="text-xs text-gray-500">Full Name</label>
-              <input type="text" value={profile.fullname} onChange={handleChange('fullname')} className={inputClass} />
-              {errors.fullname && <p className="text-red-500 text-xs mt-1">{errors.fullname}</p>}
             </div>
 
-            <div>
-              <label className="text-xs text-gray-500">Username</label>
-              <input type="text" value={profile.username} onChange={handleChange('username')} className={inputClass} />
-              {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
-            </div>
-
-            <div>
-              <label className="text-xs text-gray-500">Email Address</label>
-              <input type="email" value={profile.email} onChange={handleChange('email')} className={inputClass} />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-              <p className="text-[10px] text-gray-400 mt-1">Changing your email changes what you log in with.</p>
-            </div>
-
-            <div>
-              <label className="text-xs text-gray-500">Role</label>
-              <input
-                type="text"
-                value={user?.role === 'owner' ? 'Owner' : 'Client'}
-                disabled
-                className="w-full mt-1 border rounded px-3 py-2 text-sm bg-gray-100 text-gray-500"
-              />
-            </div>
-
-            {message && <p className="text-green-700 text-xs">{message}</p>}
-          </div>
-        </div>
-
-        {showPassword && (
-          <div className="px-6 pb-4">
-            <div className="border-t pt-4 space-y-3">
-              <p className="text-xs font-bold tracking-wide text-green-700">CHANGE PASSWORD</p>
+            {/* Personal information */}
+            <div className="min-w-0 flex-1 space-y-4">
+              <p className="text-xs font-bold tracking-wide text-green-700">
+                PERSONAL INFORMATION
+              </p>
 
               <div>
-                <label className="text-xs text-gray-500">Current Password</label>
+                <label className="block text-xs text-gray-500">
+                  Full Name
+                </label>
                 <input
-                  type="password"
-                  value={pw.current}
-                  onChange={(e) => setPw({ ...pw, current: e.target.value })}
+                  type="text"
+                  value={profile.fullname}
+                  onChange={handleChange('fullname')}
                   className={inputClass}
+                  autoComplete="name"
                 />
-                {pwErrors.current && <p className="text-red-500 text-xs mt-1">{pwErrors.current}</p>}
+                {errors.fullname && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors.fullname}
+                  </p>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-gray-500">New Password</label>
-                  <input
-                    type="password"
-                    value={pw.next}
-                    onChange={(e) => setPw({ ...pw, next: e.target.value })}
-                    placeholder="8+ characters, letters and numbers"
-                    className={inputClass}
-                  />
-                  {pwErrors.next && <p className="text-red-500 text-xs mt-1">{pwErrors.next}</p>}
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500">Confirm New Password</label>
-                  <input
-                    type="password"
-                    value={pw.confirm}
-                    onChange={(e) => setPw({ ...pw, confirm: e.target.value })}
-                    className={inputClass}
-                  />
-                  {pwErrors.confirm && <p className="text-red-500 text-xs mt-1">{pwErrors.confirm}</p>}
-                </div>
+              <div>
+                <label className="block text-xs text-gray-500">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={profile.username}
+                  onChange={handleChange('username')}
+                  className={inputClass}
+                  autoComplete="username"
+                />
+                {errors.username && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors.username}
+                  </p>
+                )}
               </div>
 
-              {pwMessage && <p className="text-green-700 text-xs">{pwMessage}</p>}
+              <div>
+                <label className="block text-xs text-gray-500">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={profile.email}
+                  onChange={handleChange('email')}
+                  className={inputClass}
+                  autoComplete="email"
+                />
+                {errors.email && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors.email}
+                  </p>
+                )}
+                <p className="mt-1 text-[10px] text-gray-400">
+                  Changing your email changes what you log in with.
+                </p>
+              </div>
 
-              <button
-                type="button"
-                onClick={handlePasswordSave}
-                className="bg-green-700 text-white text-sm px-4 py-2 rounded hover:bg-green-800"
-              >
-                Update Password
-              </button>
+              <div>
+                <label className="block text-xs text-gray-500">
+                  Role
+                </label>
+                <input
+                  type="text"
+                  value={user?.role === 'owner' ? 'Owner' : 'Client'}
+                  disabled
+                  className={`${inputClass} bg-gray-100 text-gray-500`}
+                />
+              </div>
+
+              {message && (
+                <p
+                  role="status"
+                  className={`break-words text-xs ${
+                    message.includes('successfully')
+                      ? 'text-green-700'
+                      : 'text-red-500'
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
             </div>
           </div>
-        )}
 
-        <div className="border-t px-6 py-4 flex justify-end gap-3">
+          {/* Change password section */}
+          {showPassword && (
+            <div className="px-4 pb-5 sm:px-6">
+              <div className="space-y-4 border-t border-gray-200 pt-5">
+                <div>
+                  <h3 className="text-xs font-bold tracking-wide text-green-700">
+                    CHANGE PASSWORD
+                  </h3>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Enter your current password before choosing a new one.
+                  </p>
+                </div>
+
+                <PasswordField
+                  label="Current Password"
+                  value={pw.current}
+                  onChange={(e) => {
+                    setPw((previous) => ({
+                      ...previous,
+                      current: e.target.value,
+                    }));
+                    setPwErrors((previous) => ({
+                      ...previous,
+                      current: '',
+                    }));
+                    setPwMessage('');
+                  }}
+                  error={pwErrors.current}
+                  placeholder="Enter current password"
+                  autoComplete="current-password"
+                />
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <PasswordField
+                    label="New Password"
+                    value={pw.next}
+                    onChange={(e) => {
+                      setPw((previous) => ({
+                        ...previous,
+                        next: e.target.value,
+                      }));
+                      setPwErrors((previous) => ({
+                        ...previous,
+                        next: '',
+                      }));
+                      setPwMessage('');
+                    }}
+                    error={pwErrors.next}
+                    placeholder="8+ characters, letters and numbers"
+                    autoComplete="new-password"
+                  />
+
+                  <PasswordField
+                    label="Confirm New Password"
+                    value={pw.confirm}
+                    onChange={(e) => {
+                      setPw((previous) => ({
+                        ...previous,
+                        confirm: e.target.value,
+                      }));
+                      setPwErrors((previous) => ({
+                        ...previous,
+                        confirm: '',
+                      }));
+                      setPwMessage('');
+                    }}
+                    error={pwErrors.confirm}
+                    placeholder="Re-enter new password"
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                {pwMessage && (
+                  <p
+                    role="status"
+                    className={`text-xs ${
+                      pwMessage.includes('successfully')
+                        ? 'text-green-700'
+                        : 'text-red-500'
+                    }`}
+                  >
+                    {pwMessage}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handlePasswordSave}
+                  className="w-full rounded-lg bg-green-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-800 sm:w-auto"
+                >
+                  Update Password
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Fixed footer */}
+        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-gray-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="flex items-center gap-2 border border-gray-400 text-gray-800 text-sm px-4 py-2 rounded hover:bg-gray-50"
+            onClick={() => setShowPassword((previous) => !previous)}
+            aria-expanded={showPassword}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 sm:w-auto"
           >
-            <FaLock className="text-xs" /> Change Password
+            <FaLock className="shrink-0 text-xs" />
+            {showPassword ? 'Hide Password Section' : 'Change Password'}
           </button>
+
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-2 bg-green-700 text-white text-sm px-4 py-2 rounded hover:bg-green-800"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-800 sm:w-auto"
           >
-            <FaSave className="text-xs" /> Save Changes
+            <FaSave className="shrink-0 text-xs" />
+            Save Changes
           </button>
         </div>
       </div>
