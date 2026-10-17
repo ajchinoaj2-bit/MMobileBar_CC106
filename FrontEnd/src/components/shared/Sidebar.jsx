@@ -101,7 +101,7 @@ export default function Sidebar({ open, onClose }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="group flex w-full items-center justify-center gap-3 rounded-full border border-forest-700 px-4 py-3 text-sm font-medium text-ivory-100/80 transition-all duration-200 hover:border-brass-500 hover:bg-forest-700/60 hover:text-brass-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brass-500/60 active:scale-[0.98] sm:justify-start sm:gap-4 sm:px-5 sm:text-base"
+            className="group w-full flex items-center gap-3 sm:gap-10 px-5 py-3 rounded-full border border-forest-700 text-base font-medium text-ivory-100/80 transition-all duration-200 hover:bg-forest-700/60 hover:border-brass-500 hover:text-brass-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brass-500/60 active:scale-[0.98]"
           >
             <FaSignOutAlt className="shrink-0 text-base transition-transform duration-200 group-hover:translate-x-0.5" />
             <span>Logout</span>
