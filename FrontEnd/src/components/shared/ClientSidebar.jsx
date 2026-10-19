@@ -14,8 +14,8 @@ import { logout } from '../../utils/auth';
 
 const navItems = [
   { name: 'Dashboard', path: '/client/dashboard', icon: <FaHome /> },
-  { name: 'Package', path: '/client/package', icon: <FaBoxOpen /> },
-  { name: 'Booking Form', path: '/client/booking-form', icon: <FaClipboardList /> },
+
+
   { name: 'Booking History', path: '/client/booking-history', icon: <FaHistory /> },
   { name: 'Messages', path: '/client/messages', icon: <FaComments /> },
 ];
